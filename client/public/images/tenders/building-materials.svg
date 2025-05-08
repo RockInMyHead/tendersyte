@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Стопка кирпичей -->
+    <g transform="translate(0, 100)">
+      <!-- Ряд 1 -->
+      <rect x="0" y="0" width="40" height="20" fill="#b91c1c"/>
+      <rect x="42" y="0" width="40" height="20" fill="#b91c1c"/>
+      <rect x="84" y="0" width="40" height="20" fill="#b91c1c"/>
+      
+      <!-- Ряд 2 -->
+      <rect x="21" y="22" width="40" height="20" fill="#b91c1c"/>
+      <rect x="63" y="22" width="40" height="20" fill="#b91c1c"/>
+      
+      <!-- Ряд 3 -->
+      <rect x="0" y="44" width="40" height="20" fill="#b91c1c"/>
+      <rect x="42" y="44" width="40" height="20" fill="#b91c1c"/>
+      <rect x="84" y="44" width="40" height="20" fill="#b91c1c"/>
+      
+      <!-- Линии между кирпичами -->
+      <line x1="0" y1="0" x2="124" y2="0" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="0" y1="20" x2="124" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="21" y1="22" x2="103" y2="22" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="21" y1="42" x2="103" y2="42" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="0" y1="44" x2="124" y2="44" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="0" y1="64" x2="124" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="40" y1="0" x2="40" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="42" y1="0" x2="42" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="82" y1="0" x2="82" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="84" y1="0" x2="84" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="124" y1="0" x2="124" y2="20" stroke="#7f1d1d" stroke-width="1"/>
+      
+      <line x1="21" y1="22" x2="21" y2="42" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="61" y1="22" x2="61" y2="42" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="63" y1="22" x2="63" y2="42" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="103" y1="22" x2="103" y2="42" stroke="#7f1d1d" stroke-width="1"/>
+      
+      <line x1="0" y1="44" x2="0" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="40" y1="44" x2="40" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="42" y1="44" x2="42" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="82" y1="44" x2="82" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="84" y1="44" x2="84" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+      <line x1="124" y1="44" x2="124" y2="64" stroke="#7f1d1d" stroke-width="1"/>
+    </g>
+    
+    <!-- Мешки с цементом -->
+    <g transform="translate(150, 110)">
+      <!-- Мешок 1 -->
+      <rect x="0" y="0" width="40" height="60" rx="5" ry="5" fill="#9ca3af"/>
+      <text x="12" y="35" font-family="Arial" font-size="10" fill="#1f2937">ЦЕМЕНТ</text>
+      
+      <!-- Мешок 2 -->
+      <rect x="45" y="10" width="40" height="60" rx="5" ry="5" fill="#9ca3af"/>
+      <text x="57" y="45" font-family="Arial" font-size="10" fill="#1f2937">ЦЕМЕНТ</text>
+      
+      <!-- Мешок 3 -->
+      <rect x="20" y="-15" width="40" height="60" rx="5" ry="5" fill="#9ca3af" transform="rotate(15)"/>
+      <g transform="rotate(15 40 15)">
+        <text x="30" y="15" font-family="Arial" font-size="10" fill="#1f2937">ЦЕМЕНТ</text>
+      </g>
+    </g>
+    
+    <!-- Металлические прутья арматуры -->
+    <g transform="translate(0, 190)">
+      <line x1="0" y1="0" x2="120" y2="0" stroke="#475569" stroke-width="6"/>
+      <line x1="0" y1="10" x2="120" y2="10" stroke="#475569" stroke-width="6"/>
+      <line x1="0" y1="20" x2="120" y2="20" stroke="#475569" stroke-width="6"/>
+      <line x1="0" y1="30" x2="120" y2="30" stroke="#475569" stroke-width="6"/>
+      
+      <!-- Проволока, связывающая арматуру -->
+      <line x1="30" y1="-5" x2="30" y2="35" stroke="#94a3b8" stroke-width="1"/>
+      <line x1="60" y1="-5" x2="60" y2="35" stroke="#94a3b8" stroke-width="1"/>
+      <line x1="90" y1="-5" x2="90" y2="35" stroke="#94a3b8" stroke-width="1"/>
+    </g>
+    
+    <!-- Листы гипсокартона -->
+    <g transform="translate(150, 190)">
+      <rect x="0" y="0" width="100" height="30" fill="#f1f5f9"/>
+      <rect x="5" y="5" width="100" height="30" fill="#f1f5f9"/>
+      <rect x="10" y="10" width="100" height="30" fill="#f1f5f9"/>
+    </g>
+    
+    <!-- Надпись -->
+    <text x="30" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#0f172a">Строительные материалы</text>
+  </g>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 50)">
+    <!-- Земля -->
+    <rect x="0" y="200" width="300" height="30" fill="#a16207"/>
+    <rect x="0" y="195" width="300" height="5" fill="#65a30d"/>
+    
+    <!-- Экскаватор -->
+    <g transform="translate(40, 100)">
+      <!-- Гусеницы -->
+      <rect x="0" y="70" width="100" height="30" rx="5" ry="5" fill="#334155"/>
+      <rect x="10" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="20" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="30" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="40" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="50" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="60" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="70" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="80" y="70" width="5" height="30" fill="#1e293b"/>
+      <rect x="90" y="70" width="5" height="30" fill="#1e293b"/>
+      
+      <!-- Корпус -->
+      <rect x="10" y="40" width="80" height="30" fill="#eab308"/>
+      <rect x="15" y="30" width="60" height="15" fill="#eab308"/>
+      
+      <!-- Кабина -->
+      <rect x="60" y="5" width="25" height="25" rx="3" ry="3" fill="#eab308"/>
+      <rect x="65" y="10" width="15" height="15" fill="#bfdbfe"/>
+      
+      <!-- Стрела экскаватора -->
+      <rect x="20" y="30" width="60" height="10" fill="#ca8a04" transform="rotate(-20, 20, 30)"/>
+      <rect x="-10" y="20" width="60" height="8" fill="#ca8a04" transform="rotate(30, -10, 20)"/>
+      
+      <!-- Ковш -->
+      <path d="M-20,0 L-40,10 L-37,25 L-10,15 Z" fill="#ca8a04"/>
+      
+      <!-- Выемка грунта -->
+      <path d="M-50,20 C-40,10 -35,20 -30,25 L-40,35 C-50,30 -55,25 -50,20 Z" fill="#a16207"/>
+    </g>
+    
+    <!-- Надпись -->
+    <text x="75" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#1e293b">Аренда экскаватора</text>
+  </g>
+</svg>

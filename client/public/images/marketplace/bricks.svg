@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Стопка кирпичей -->
+    <!-- Ряд 1 -->
+    <g transform="translate(20, 70)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="55" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="110" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="165" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="220" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      
+      <!-- Текстура кирпича -->
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="60" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="115" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="170" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="225" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Ряд 2 -->
+    <g transform="translate(45, 100)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="55" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="110" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="165" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      
+      <!-- Текстура кирпича -->
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="60" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="115" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="170" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Ряд 3 -->
+    <g transform="translate(20, 130)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="55" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="110" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="165" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="220" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      
+      <!-- Текстура кирпича -->
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="60" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="115" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="170" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="225" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Ряд 4 -->
+    <g transform="translate(45, 160)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="55" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="110" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="165" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      
+      <!-- Текстура кирпича -->
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="60" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="115" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="170" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Ряд 5 (самый нижний) -->
+    <g transform="translate(20, 190)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="55" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="110" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="165" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="220" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      
+      <!-- Текстура кирпича -->
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="60" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="115" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="170" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+      <rect x="225" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Отдельный кирпич на переднем плане -->
+    <g transform="translate(140, 230)">
+      <rect x="0" y="0" width="50" height="25" rx="2" ry="2" fill="#dc2626"/>
+      <rect x="5" y="5" width="40" height="15" rx="2" ry="2" fill="#b91c1c"/>
+    </g>
+    
+    <!-- Тень под стопкой -->
+    <ellipse cx="145" cy="230" rx="130" ry="10" fill="#94a3b8" opacity="0.3"/>
+    
+    <!-- Надпись -->
+    <text x="40" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#0f172a">Кирпич облицовочный красный</text>
+  </g>
+</svg>

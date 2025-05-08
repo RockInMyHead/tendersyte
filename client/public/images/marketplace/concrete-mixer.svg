@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Шасси автомобиля -->
+    <rect x="30" y="180" width="220" height="10" fill="#334155"/>
+    
+    <!-- Колеса -->
+    <circle cx="60" cy="200" r="20" fill="#1e293b"/>
+    <circle cx="60" cy="200" r="10" fill="#64748b"/>
+    <circle cx="120" cy="200" r="20" fill="#1e293b"/>
+    <circle cx="120" cy="200" r="10" fill="#64748b"/>
+    <circle cx="180" cy="200" r="20" fill="#1e293b"/>
+    <circle cx="180" cy="200" r="10" fill="#64748b"/>
+    <circle cx="240" cy="200" r="20" fill="#1e293b"/>
+    <circle cx="240" cy="200" r="10" fill="#64748b"/>
+    
+    <!-- Кабина -->
+    <rect x="30" y="130" width="60" height="50" rx="5" ry="5" fill="#eab308"/>
+    <rect x="40" y="140" width="40" height="20" fill="#bfdbfe"/>
+    
+    <!-- Миксер для бетона (барабан) -->
+    <g transform="translate(140, 140)">
+      <!-- Основной барабан -->
+      <ellipse cx="0" cy="0" rx="70" ry="40" fill="#e5e7eb"/>
+      <ellipse cx="0" cy="0" rx="60" ry="30" stroke="#9ca3af" stroke-width="2" fill="none"/>
+      
+      <!-- Загрузочный желоб -->
+      <path d="M-70,0 L-90,40 L-80,40 L-60,0 Z" fill="#d1d5db"/>
+      
+      <!-- Разгрузочный желоб -->
+      <path d="M60,0 L80,-20 L90,-20 L70,0 Z" fill="#d1d5db"/>
+      
+      <!-- Усиливающие кольца на барабане -->
+      <ellipse cx="0" cy="0" rx="70" ry="40" stroke="#9ca3af" stroke-width="3" fill="none"/>
+      <ellipse cx="0" cy="0" rx="50" ry="30" stroke="#9ca3af" stroke-width="2" fill="none"/>
+      
+      <!-- Рельефная поверхность барабана (спираль) -->
+      <path d="M-60,-10 C-40,-25 40,-25 60,-10" stroke="#9ca3af" stroke-width="2" fill="none"/>
+      <path d="M-60,0 C-40,-15 40,-15 60,0" stroke="#9ca3af" stroke-width="2" fill="none"/>
+      <path d="M-60,10 C-40,-5 40,-5 60,10" stroke="#9ca3af" stroke-width="2" fill="none"/>
+      <path d="M-60,20 C-40,5 40,5 60,20" stroke="#9ca3af" stroke-width="2" fill="none"/>
+    </g>
+    
+    <!-- Опорная конструкция для барабана -->
+    <rect x="100" y="170" width="80" height="10" fill="#475569"/>
+    <rect x="100" y="170" width="10" height="20" fill="#475569"/>
+    <rect x="170" y="170" width="10" height="20" fill="#475569"/>
+    
+    <!-- Логотип FIORI -->
+    <text x="140" y="130" font-family="Arial" font-size="10" font-weight="bold" fill="#0284c7">FIORI</text>
+    
+    <!-- Надпись -->
+    <text x="50" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#0f172a">Бетономешалка FIORI DB 460</text>
+  </g>
+</svg>

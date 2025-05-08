@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Тень под арматурой -->
+    <ellipse cx="150" cy="230" rx="140" ry="10" fill="#94a3b8" opacity="0.3"/>
+    
+    <!-- Первый пучок арматуры -->
+    <g transform="translate(20, 90)">
+      <line x1="0" y1="0" x2="260" y2="0" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      <line x1="0" y1="15" x2="260" y2="15" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      <line x1="0" y1="30" x2="260" y2="30" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      <line x1="0" y1="45" x2="260" y2="45" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      
+      <!-- Ребра арматуры (рельеф) -->
+      <line x1="20" y1="-6" x2="20" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="40" y1="-6" x2="40" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="60" y1="-6" x2="60" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="80" y1="-6" x2="80" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="100" y1="-6" x2="100" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="120" y1="-6" x2="120" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="140" y1="-6" x2="140" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="160" y1="-6" x2="160" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="180" y1="-6" x2="180" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="200" y1="-6" x2="200" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="220" y1="-6" x2="220" y2="51" stroke="#64748b" stroke-width="1"/>
+      <line x1="240" y1="-6" x2="240" y2="51" stroke="#64748b" stroke-width="1"/>
+      
+      <!-- Проволока для связки -->
+      <path d="M15,-5 C20,-10 30,-10 35,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M15,50 C20,55 30,55 35,50" stroke="#71717a" stroke-width="1" fill="none"/>
+      
+      <path d="M95,-5 C100,-10 110,-10 115,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M95,50 C100,55 110,55 115,50" stroke="#71717a" stroke-width="1" fill="none"/>
+      
+      <path d="M175,-5 C180,-10 190,-10 195,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M175,50 C180,55 190,55 195,50" stroke="#71717a" stroke-width="1" fill="none"/>
+    </g>
+    
+    <!-- Второй пучок арматуры (смещенный) -->
+    <g transform="translate(10, 160)">
+      <line x1="0" y1="0" x2="260" y2="0" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      <line x1="0" y1="15" x2="260" y2="15" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      <line x1="0" y1="30" x2="260" y2="30" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+      
+      <!-- Ребра арматуры (рельеф) -->
+      <line x1="20" y1="-6" x2="20" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="40" y1="-6" x2="40" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="60" y1="-6" x2="60" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="80" y1="-6" x2="80" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="100" y1="-6" x2="100" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="120" y1="-6" x2="120" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="140" y1="-6" x2="140" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="160" y1="-6" x2="160" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="180" y1="-6" x2="180" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="200" y1="-6" x2="200" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="220" y1="-6" x2="220" y2="36" stroke="#64748b" stroke-width="1"/>
+      <line x1="240" y1="-6" x2="240" y2="36" stroke="#64748b" stroke-width="1"/>
+      
+      <!-- Проволока для связки -->
+      <path d="M55,-5 C60,-10 70,-10 75,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M55,35 C60,40 70,40 75,35" stroke="#71717a" stroke-width="1" fill="none"/>
+      
+      <path d="M135,-5 C140,-10 150,-10 155,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M135,35 C140,40 150,40 155,35" stroke="#71717a" stroke-width="1" fill="none"/>
+      
+      <path d="M215,-5 C220,-10 230,-10 235,-5" stroke="#71717a" stroke-width="1" fill="none"/>
+      <path d="M215,35 C220,40 230,40 235,35" stroke="#71717a" stroke-width="1" fill="none"/>
+    </g>
+    
+    <!-- Этикетка с маркировкой -->
+    <g transform="translate(120, 65)">
+      <rect x="0" y="0" width="60" height="15" fill="#fef3c7" rx="3" ry="3"/>
+      <text x="5" y="11" font-family="Arial" font-size="10" fill="#92400e">A500C Ø12мм</text>
+    </g>
+    
+    <!-- Надпись -->
+    <text x="60" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#0f172a">Арматура А500С</text>
+  </g>
+</svg>

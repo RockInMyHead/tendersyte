@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Внутренний интерьер помещения -->
+    <rect x="0" y="50" width="300" height="200" fill="#e2e8f0"/>
+    
+    <!-- Пол -->
+    <rect x="0" y="200" width="300" height="50" fill="#d97706"/>
+    
+    <!-- Дверной проем -->
+    <rect x="230" y="100" width="70" height="150" fill="#475569"/>
+    
+    <!-- Окно -->
+    <rect x="30" y="80" width="80" height="60" fill="#bfdbfe"/>
+    <line x1="70" y1="80" x2="70" y2="140" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="30" y1="110" x2="110" y2="110" stroke="#94a3b8" stroke-width="2"/>
+    
+    <!-- Рабочие и строительные элементы -->
+    <g transform="translate(150, 150)">
+      <!-- Рабочий -->
+      <circle cx="0" cy="0" r="10" fill="#f59e0b"/>
+      <rect x="-5" y="10" width="10" height="25" fill="#0ea5e9"/>
+      <line x1="-5" y1="15" x2="-15" y2="25" stroke="#0ea5e9" stroke-width="4"/>
+      <line x1="5" y1="15" x2="15" y2="5" stroke="#0ea5e9" stroke-width="4"/>
+      <line x1="0" y1="35" x2="-5" y2="50" stroke="#1e293b" stroke-width="4"/>
+      <line x1="0" y1="35" x2="5" y2="50" stroke="#1e293b" stroke-width="4"/>
+      
+      <!-- Валик в руке -->
+      <rect x="15" y="5" width="20" height="5" fill="#475569"/>
+      <rect x="35" y="0" width="10" height="15" fill="#e2e8f0"/>
+    </g>
+    
+    <!-- Недокрашенная стена -->
+    <rect x="120" y="50" width="100" height="100" fill="#cbd5e1"/>
+    <rect x="120" y="50" width="100" height="50" fill="#e2e8f0"/>
+    
+    <!-- Стремянка -->
+    <g transform="translate(50, 150)">
+      <line x1="0" y1="0" x2="0" y2="50" stroke="#64748b" stroke-width="3"/>
+      <line x1="30" y1="0" x2="30" y2="50" stroke="#64748b" stroke-width="3"/>
+      <line x1="0" y1="0" x2="30" y2="0" stroke="#64748b" stroke-width="2"/>
+      <line x1="0" y1="15" x2="30" y2="15" stroke="#64748b" stroke-width="2"/>
+      <line x1="0" y1="30" x2="30" y2="30" stroke="#64748b" stroke-width="2"/>
+      <line x1="0" y1="45" x2="30" y2="45" stroke="#64748b" stroke-width="2"/>
+    </g>
+    
+    <!-- Ведро с краской -->
+    <g transform="translate(180, 180)">
+      <circle cx="0" cy="0" r="10" fill="#a5b4fc"/>
+      <rect x="-10" y="-15" width="20" height="15" fill="#818cf8"/>
+    </g>
+    
+    <!-- Инструменты на полу -->
+    <g transform="translate(80, 210)">
+      <rect x="0" y="0" width="30" height="5" fill="#475569"/>
+      <rect x="10" y="-10" width="15" height="10" fill="#dc2626"/>
+    </g>
+    
+    <!-- Шпатель -->
+    <g transform="translate(120, 210)">
+      <rect x="0" y="0" width="25" height="3" fill="#475569"/>
+      <rect x="25" y="-5" width="10" height="12" fill="#94a3b8"/>
+    </g>
+    
+    <!-- Надпись -->
+    <text x="50" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#1e293b">Отделочные работы</text>
+  </g>
+</svg>
