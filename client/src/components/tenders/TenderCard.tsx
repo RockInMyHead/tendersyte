@@ -18,37 +18,39 @@ const TenderCard = ({ tender }: TenderCardProps) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      <Link href={`/tenders/${tender.id}`}>
-        <div className="relative">
+      <div className="relative">
+        <Link href={`/tenders/${tender.id}`}>
           <img 
             src={imageUrl} 
             alt={tender.title} 
             className="w-full h-40 object-cover"
           />
-          <div className="absolute top-0 left-0 m-2">
-            <Badge 
-              variant="secondary"
-              className={cn("mr-2", getStatusColor(tender.status))}
-            >
-              {tender.status === 'open' ? 'Актуален' : 
-               tender.status === 'in_progress' ? 'В работе' : 
-               tender.status === 'completed' ? 'Завершен' : 'Отменен'}
-            </Badge>
-          </div>
-          <div className="absolute top-0 right-0 m-2">
-            <Badge 
-              variant="secondary"
-              className={getCategoryColor(tender.category)}
-            >
-              {tender.category.charAt(0).toUpperCase() + tender.category.slice(1)}
-            </Badge>
-          </div>
+        </Link>
+        <div className="absolute top-0 left-0 m-2">
+          <Badge 
+            variant="secondary"
+            className={cn("mr-2", getStatusColor(tender.status))}
+          >
+            {tender.status === 'open' ? 'Актуален' : 
+             tender.status === 'in_progress' ? 'В работе' : 
+             tender.status === 'completed' ? 'Завершен' : 'Отменен'}
+          </Badge>
         </div>
-      </Link>
+        <div className="absolute top-0 right-0 m-2">
+          <Badge 
+            variant="secondary"
+            className={getCategoryColor(tender.category)}
+          >
+            {tender.category.charAt(0).toUpperCase() + tender.category.slice(1)}
+          </Badge>
+        </div>
+      </div>
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-          {tender.title}
-        </h3>
+        <Link href={`/tenders/${tender.id}`}>
+          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+            {tender.title}
+          </h3>
+        </Link>
         <div className="mt-2 text-sm text-gray-500 line-clamp-3">
           {tender.description}
         </div>

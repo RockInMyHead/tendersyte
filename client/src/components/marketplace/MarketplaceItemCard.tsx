@@ -48,44 +48,46 @@ export default function MarketplaceItemCard({ listing }: MarketplaceItemCardProp
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      <Link href={`/marketplace/${listing.id}`}>
-        <div className="relative">
+      <div className="relative">
+        <Link href={`/marketplace/${listing.id}`}>
           <img 
             src={imageUrl} 
             alt={listing.title} 
             className="w-full h-44 object-cover"
           />
-          <div className="absolute top-0 left-0 m-2">
-            <Badge className={getStatusColor(listing.listingType)}>
-              {getListingTypeLabel(listing.listingType)}
-            </Badge>
-          </div>
-          <button 
-            className="absolute top-0 right-0 m-2 p-1 rounded-full bg-white text-gray-500 hover:text-primary focus:outline-none"
-            onClick={handleFavoriteToggle}
-          >
-            <Heart className={`h-4 w-4 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
-          </button>
+        </Link>
+        <div className="absolute top-0 left-0 m-2">
+          <Badge className={getStatusColor(listing.listingType)}>
+            {getListingTypeLabel(listing.listingType)}
+          </Badge>
         </div>
-        <div className="p-4">
+        <button 
+          className="absolute top-0 right-0 m-2 p-1 rounded-full bg-white text-gray-500 hover:text-primary focus:outline-none"
+          onClick={handleFavoriteToggle}
+        >
+          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
+        </button>
+      </div>
+      <div className="p-4">
+        <Link href={`/marketplace/${listing.id}`}>
           <h3 className="text-lg font-medium text-gray-900 line-clamp-1">{listing.title}</h3>
-          <div className="flex items-center mt-1 text-sm text-gray-500">
-            <MapPin className="h-4 w-4 mr-1" />
-            {listing.location}
-          </div>
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-xl font-bold text-secondary">
-              {formatPrice(listing.price, listing.listingType)}
-            </div>
-            <Link href={`/messages?userId=${listing.userId}`}>
-              <Button size="sm" variant="outline" className="flex items-center">
-                <MessageCircle className="h-4 w-4 mr-1" />
-                Написать
-              </Button>
-            </Link>
-          </div>
+        </Link>
+        <div className="flex items-center mt-1 text-sm text-gray-500">
+          <MapPin className="h-4 w-4 mr-1" />
+          {listing.location}
         </div>
-      </Link>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-xl font-bold text-secondary">
+            {formatPrice(listing.price, listing.listingType)}
+          </div>
+          <Link href={`/messages?userId=${listing.userId}`}>
+            <Button size="sm" variant="outline" className="flex items-center">
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Написать
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
