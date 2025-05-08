@@ -43,6 +43,7 @@ export const tenders = pgTable("tenders", {
   deadline: timestamp("deadline").notNull(),
   status: tenderStatusEnum("status").notNull().default('open'),
   userId: integer("user_id").notNull().references(() => users.id),
+  images: json("images").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   viewCount: integer("view_count").default(0),

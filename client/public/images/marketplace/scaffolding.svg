@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(50, 30)">
+    <!-- Основание строительных лесов -->
+    <line x1="20" y1="220" x2="280" y2="220" stroke="#475569" stroke-width="4"/>
+    
+    <!-- Вертикальные опоры -->
+    <line x1="40" y1="50" x2="40" y2="220" stroke="#0284c7" stroke-width="5"/>
+    <line x1="100" y1="50" x2="100" y2="220" stroke="#0284c7" stroke-width="5"/>
+    <line x1="160" y1="50" x2="160" y2="220" stroke="#0284c7" stroke-width="5"/>
+    <line x1="220" y1="50" x2="220" y2="220" stroke="#0284c7" stroke-width="5"/>
+    <line x1="280" y1="50" x2="280" y2="220" stroke="#0284c7" stroke-width="5"/>
+    
+    <!-- Горизонтальные перекладины -->
+    <line x1="40" y1="80" x2="280" y2="80" stroke="#0284c7" stroke-width="4"/>
+    <line x1="40" y1="130" x2="280" y2="130" stroke="#0284c7" stroke-width="4"/>
+    <line x1="40" y1="180" x2="280" y2="180" stroke="#0284c7" stroke-width="4"/>
+    
+    <!-- Диагональные связи -->
+    <line x1="40" y1="80" x2="100" y2="130" stroke="#0284c7" stroke-width="3"/>
+    <line x1="100" y1="80" x2="160" y2="130" stroke="#0284c7" stroke-width="3"/>
+    <line x1="160" y1="80" x2="220" y2="130" stroke="#0284c7" stroke-width="3"/>
+    <line x1="220" y1="80" x2="280" y2="130" stroke="#0284c7" stroke-width="3"/>
+    
+    <line x1="40" y1="130" x2="100" y2="180" stroke="#0284c7" stroke-width="3"/>
+    <line x1="100" y1="130" x2="160" y2="180" stroke="#0284c7" stroke-width="3"/>
+    <line x1="160" y1="130" x2="220" y2="180" stroke="#0284c7" stroke-width="3"/>
+    <line x1="220" y1="130" x2="280" y2="180" stroke="#0284c7" stroke-width="3"/>
+    
+    <line x1="40" y1="180" x2="100" y2="220" stroke="#0284c7" stroke-width="3"/>
+    <line x1="100" y1="180" x2="160" y2="220" stroke="#0284c7" stroke-width="3"/>
+    <line x1="160" y1="180" x2="220" y2="220" stroke="#0284c7" stroke-width="3"/>
+    <line x1="220" y1="180" x2="280" y2="220" stroke="#0284c7" stroke-width="3"/>
+    
+    <!-- Настилы -->
+    <rect x="45" y="75" width="230" height="10" fill="#78716c" rx="1" ry="1"/>
+    <rect x="45" y="125" width="230" height="10" fill="#78716c" rx="1" ry="1"/>
+    <rect x="45" y="175" width="230" height="10" fill="#78716c" rx="1" ry="1"/>
+    
+    <!-- Соединительные элементы -->
+    <circle cx="40" cy="80" r="3" fill="#0369a1"/>
+    <circle cx="100" cy="80" r="3" fill="#0369a1"/>
+    <circle cx="160" cy="80" r="3" fill="#0369a1"/>
+    <circle cx="220" cy="80" r="3" fill="#0369a1"/>
+    <circle cx="280" cy="80" r="3" fill="#0369a1"/>
+    
+    <circle cx="40" cy="130" r="3" fill="#0369a1"/>
+    <circle cx="100" cy="130" r="3" fill="#0369a1"/>
+    <circle cx="160" cy="130" r="3" fill="#0369a1"/>
+    <circle cx="220" cy="130" r="3" fill="#0369a1"/>
+    <circle cx="280" cy="130" r="3" fill="#0369a1"/>
+    
+    <circle cx="40" cy="180" r="3" fill="#0369a1"/>
+    <circle cx="100" cy="180" r="3" fill="#0369a1"/>
+    <circle cx="160" cy="180" r="3" fill="#0369a1"/>
+    <circle cx="220" cy="180" r="3" fill="#0369a1"/>
+    <circle cx="280" cy="180" r="3" fill="#0369a1"/>
+    
+    <!-- Строительный фасад на фоне -->
+    <rect x="10" y="40" width="300" height="180" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,5" fill="none"/>
+    
+    <!-- Рабочий на лесах -->
+    <g transform="translate(200, 100)">
+      <circle cx="0" cy="0" r="8" fill="#f59e0b"/>
+      <rect x="-4" y="8" width="8" height="20" fill="#0ea5e9"/>
+      <line x1="-4" y1="12" x2="-12" y2="18" stroke="#0ea5e9" stroke-width="3"/>
+      <line x1="4" y1="12" x2="12" y2="18" stroke="#0ea5e9" stroke-width="3"/>
+      <line x1="0" y1="28" x2="-4" y2="40" stroke="#334155" stroke-width="3"/>
+      <line x1="0" y1="28" x2="4" y2="40" stroke="#334155" stroke-width="3"/>
+    </g>
+    
+    <!-- Надпись -->
+    <text x="40" y="30" font-family="Arial" font-size="18" font-weight="bold" fill="#0f172a">Строительные леса</text>
+  </g>
+</svg>
