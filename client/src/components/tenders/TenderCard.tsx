@@ -5,18 +5,27 @@ import StarRating from "@/components/shared/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Tender } from "@/lib/types";
 import { Eye, MapPin } from "lucide-react";
-import { cn, formatDate, getUserInitials, getCategoryColor, getStatusColor } from "@/lib/utils";
+import { cn, formatDate, getUserInitials, getCategoryColor, getStatusColor, getPlaceholderImage } from "@/lib/utils";
 
 interface TenderCardProps {
   tender: Tender;
 }
 
 const TenderCard = ({ tender }: TenderCardProps) => {
+  const imageUrl = tender.images && tender.images.length > 0 
+    ? tender.images[0] 
+    : getPlaceholderImage(tender.category);
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      <div className="p-5">
-        <div className="flex items-start justify-between">
-          <div>
+      <Link href={`/tenders/${tender.id}`}>
+        <div className="relative">
+          <img 
+            src={imageUrl} 
+            alt={tender.title} 
+            className="w-full h-40 object-cover"
+          />
+          <div className="absolute top-0 left-0 m-2">
             <Badge 
               variant="secondary"
               className={cn("mr-2", getStatusColor(tender.status))}
@@ -25,20 +34,19 @@ const TenderCard = ({ tender }: TenderCardProps) => {
                tender.status === 'in_progress' ? 'В работе' : 
                tender.status === 'completed' ? 'Завершен' : 'Отменен'}
             </Badge>
-            {tender.category && (
-              <Badge 
-                variant="secondary"
-                className={getCategoryColor(tender.category)}
-              >
-                {tender.category.charAt(0).toUpperCase() + tender.category.slice(1)}
-              </Badge>
-            )}
           </div>
-          <div className="text-gray-500 text-sm">
-            до {formatDate(tender.deadline)}
+          <div className="absolute top-0 right-0 m-2">
+            <Badge 
+              variant="secondary"
+              className={getCategoryColor(tender.category)}
+            >
+              {tender.category.charAt(0).toUpperCase() + tender.category.slice(1)}
+            </Badge>
           </div>
         </div>
-        <h3 className="mt-3 text-lg font-semibold text-gray-900 line-clamp-2">
+      </Link>
+      <div className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
           {tender.title}
         </h3>
         <div className="mt-2 text-sm text-gray-500 line-clamp-3">

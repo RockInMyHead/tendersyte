@@ -91,12 +91,11 @@ export function getCategoryColor(category: string): string {
 // Generate placeholder image URL
 export function getPlaceholderImage(category: string): string {
   const imageMapping: Record<string, string> = {
-    equipment: "https://images.unsplash.com/photo-1580820726687-30e7ba70d976",
-    tools: "https://images.unsplash.com/photo-1504148455328-c376907d081c",
-    materials: "https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b",
-    construction: "https://images.unsplash.com/photo-1504307651254-35680f356dfd",
-    repair: "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
+    equipment: "images/marketplace/tower-crane.svg",
+    tools: "images/marketplace/scaffolding.svg",
+    materials: "images/marketplace/bricks.svg",
+    services: "images/tenders/finishing-works.svg",
   };
   
-  return imageMapping[category] || "https://images.unsplash.com/photo-1504307651254-35680f356dfd";
+  return imageMapping[category] || "images/tenders/residential-project.svg";
 }
