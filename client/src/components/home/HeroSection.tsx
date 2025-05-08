@@ -29,8 +29,7 @@ const HeroSection = () => {
               <Link href={isAuthenticated ? "/marketplace/create" : "/login"}>
                 <Button 
                   size="lg"
-                  variant="outline" 
-                  className="w-full sm:w-auto text-white border-white hover:bg-white hover:bg-opacity-10"
+                  className="w-full sm:w-auto bg-amber-500 text-white hover:bg-amber-600"
                 >
                   Разместить объявление
                 </Button>
@@ -39,8 +38,8 @@ const HeroSection = () => {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img 
-              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" 
-              alt="Строительная площадка с рабочими и техникой" 
+              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" 
+              alt="Строительная площадка с техникой и рабочими" 
               className="rounded-lg shadow-lg max-w-full h-auto"
             />
           </div>
