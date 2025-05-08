@@ -32,6 +32,7 @@ export interface Tender {
   deadline: string;
   status: 'open' | 'in_progress' | 'completed' | 'canceled';
   userId: number;
+  images: string[];
   createdAt: string;
   updatedAt: string;
   viewCount: number;
@@ -133,6 +134,7 @@ export interface TenderFormData {
   budget?: number;
   location: string;
   deadline: string;
+  images?: string[];
 }
 
 export interface TenderBidFormData {
