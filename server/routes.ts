@@ -181,12 +181,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tender routes
   apiRouter.get('/tenders', async (req: Request, res: Response) => {
     try {
+      // Обработка параметра requiredProfessions, который приходит в виде строки с разделителями
+      let requiredProfessions: string[] | undefined;
+      if (req.query.requiredProfessions) {
+        requiredProfessions = (req.query.requiredProfessions as string).split(',');
+      }
+
       const filters = {
         category: req.query.category as string | undefined,
         location: req.query.location as string | undefined,
         status: req.query.status as string | undefined,
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
-        searchTerm: req.query.search as string | undefined
+        searchTerm: req.query.search as string | undefined,
+        personType: req.query.personType as string | undefined,
+        requiredProfessions
       };
       
       const tenders = await storage.getTenders(filters);

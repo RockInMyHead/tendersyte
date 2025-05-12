@@ -131,6 +131,8 @@ export class SQLiteStorage implements IStorage {
     status?: string;
     userId?: number;
     searchTerm?: string;
+    personType?: string;
+    requiredProfessions?: string[];
   }): Promise<Tender[]> {
     let query = db.select().from(tenders);
     
@@ -158,6 +160,19 @@ export class SQLiteStorage implements IStorage {
             like(tenders.description, `%${filters.searchTerm}%`)
           )
         );
+      }
+      
+      if (filters.personType) {
+        query = query.where(eq(tenders.personType, filters.personType));
+      }
+      
+      // Для фильтрации по требуемым профессиям используем LIKE для каждой профессии
+      // так как требуемые профессии хранятся в JSON строке
+      if (filters.requiredProfessions && filters.requiredProfessions.length > 0) {
+        const professionsConditions = filters.requiredProfessions.map(profession => 
+          like(tenders.requiredProfessions, `%${profession}%`)
+        );
+        query = query.where(or(...professionsConditions));
       }
     }
     

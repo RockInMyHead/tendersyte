@@ -175,6 +175,8 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
     setStatus('');
     setMinPrice(0);
     setMaxPrice(1000000);
+    setPersonType('');
+    setSelectedProfessions([]);
     setActiveFilters([]);
     
     // Keep search term but clear other filters
@@ -303,22 +305,70 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
                   )}
 
                   {type === 'tenders' && (
-                    <div className="space-y-2">
-                      <Label>Статус</Label>
-                      <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Все статусы" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Все статусы</SelectItem>
-                          {TENDER_STATUSES.map((status) => (
-                            <SelectItem key={status.value} value={status.value}>
-                              {status.label}
-                            </SelectItem>
+                    <>
+                      <div className="space-y-2">
+                        <Label>Статус</Label>
+                        <Select value={status} onValueChange={setStatus}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Все статусы" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Все статусы</SelectItem>
+                            {TENDER_STATUSES.map((status) => (
+                              <SelectItem key={status.value} value={status.value}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Тип заказчика</Label>
+                        <Select value={personType} onValueChange={setPersonType}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Все заказчики" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Все заказчики</SelectItem>
+                            {PERSON_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Требуемые профессии</Label>
+                        <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                          {PROFESSIONS.map((profession) => (
+                            <div key={profession.value} className="flex items-center space-x-2 mb-2">
+                              <Checkbox 
+                                id={`profession-${profession.value}`} 
+                                checked={selectedProfessions.includes(profession.value)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedProfessions([...selectedProfessions, profession.value]);
+                                  } else {
+                                    setSelectedProfessions(
+                                      selectedProfessions.filter(p => p !== profession.value)
+                                    );
+                                  }
+                                }}
+                              />
+                              <label 
+                                htmlFor={`profession-${profession.value}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {profession.label}
+                              </label>
+                            </div>
                           ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
                 <SheetFooter>
