@@ -71,3 +71,30 @@ export const USER_TYPES = [
   { value: "contractor", label: "Подрядчик" },
   { value: "company", label: "Компания" },
 ];
+
+// Person types (for tenders)
+export const PERSON_TYPES = [
+  { value: "individual", label: "Физическое лицо" },
+  { value: "legal_entity", label: "Юридическое лицо" },
+];
+
+// Professions
+export const PROFESSIONS = [
+  { value: "builder", label: "Строитель" },
+  { value: "carpenter", label: "Плотник" },
+  { value: "electrician", label: "Электрик" },
+  { value: "plumber", label: "Сантехник" },
+  { value: "painter", label: "Маляр" },
+  { value: "welder", label: "Сварщик" },
+  { value: "tiler", label: "Плиточник" },
+  { value: "roofer", label: "Кровельщик" },
+  { value: "plasterer", label: "Штукатур" },
+  { value: "bricklayer", label: "Каменщик" },
+  { value: "concrete_worker", label: "Бетонщик" },
+  { value: "excavator_operator", label: "Оператор экскаватора" },
+  { value: "crane_operator", label: "Крановщик" },
+  { value: "architect", label: "Архитектор" },
+  { value: "designer", label: "Дизайнер" },
+  { value: "engineer", label: "Инженер" },
+  { value: "project_manager", label: "Руководитель проекта" },
+];

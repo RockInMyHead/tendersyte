@@ -36,6 +36,8 @@ export interface Tender {
   createdAt: string;
   updatedAt: string;
   viewCount: number;
+  personType: 'individual' | 'legal_entity';
+  requiredProfessions: string[];
   user?: User;
 }
 
@@ -135,6 +137,8 @@ export interface TenderFormData {
   location: string;
   deadline: string;
   images?: string[];
+  personType: 'individual' | 'legal_entity';
+  requiredProfessions?: string[];
 }
 
 export interface TenderBidFormData {
