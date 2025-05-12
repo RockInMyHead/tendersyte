@@ -22,9 +22,27 @@ import {
 function parseJsonArray(json: string | null): string[] {
   if (!json) return [];
   try {
+    // Проверяем, является ли json уже массивом
+    if (Array.isArray(json)) return json;
+    
+    // Проверяем, начинается ли строка с '[' (признак JSON массива)
+    if (typeof json === 'string' && json.trim().startsWith('[')) {
+      return JSON.parse(json);
+    }
+    
+    // Если это строка URL без квадратных скобок, обернем в массив
+    if (typeof json === 'string' && json.includes('http')) {
+      return [json];
+    }
+    
+    // Стандартный парсинг JSON
     return JSON.parse(json);
   } catch (e) {
     console.error('Failed to parse JSON:', e);
+    // Если это похоже на URL, но не удалось распарсить как JSON, вернем как один элемент массива
+    if (typeof json === 'string' && (json.includes('http') || json.includes('www'))) {
+      return [json];
+    }
     return [];
   }
 }
