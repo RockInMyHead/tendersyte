@@ -49,7 +49,20 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(queryKey[0] as string, {
+    // Проверяем, есть ли параметры запроса
+    let url = queryKey[0] as string;
+    const params = queryKey[1] as Record<string, string> | undefined;
+    
+    // Если есть параметры запроса, добавляем их к URL
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        searchParams.append(key, value);
+      });
+      url = `${url}?${searchParams.toString()}`;
+    }
+
+    const res = await fetch(url, {
       headers,
       credentials: "include",
     });
