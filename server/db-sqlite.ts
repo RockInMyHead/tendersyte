@@ -46,6 +46,7 @@ export function initializeDatabase() {
           avatar TEXT,
           rating INTEGER DEFAULT 0,
           is_verified INTEGER DEFAULT 0,
+          completed_projects INTEGER DEFAULT 0,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `, `

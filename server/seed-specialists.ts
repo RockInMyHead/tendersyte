@@ -146,13 +146,48 @@ export async function seedTopSpecialists() {
     }
   ];
   
-  // Добавляем данные в базу данных
+  // Для SQLite нам нужно использовать текстовый формат для дат
+  // Преобразуем данные перед вставкой, удалив поля, которые вызывают проблемы
   for (const individual of individuals) {
-    await db.insert(users).values(individual);
+    try {
+      const userData = {
+        username: individual.username,
+        password: individual.password,
+        email: individual.email,
+        fullName: individual.fullName,
+        userType: individual.userType,
+        location: individual.location,
+        bio: individual.bio,
+        rating: individual.rating,
+        completedProjects: individual.completedProjects,
+        isVerified: individual.isVerified
+      };
+      await db.insert(users).values(userData);
+      console.log(`Добавлен специалист: ${individual.fullName}`);
+    } catch (error) {
+      console.error(`Ошибка при добавлении специалиста ${individual.fullName}:`, error);
+    }
   }
   
   for (const company of companies) {
-    await db.insert(users).values(company);
+    try {
+      const userData = {
+        username: company.username,
+        password: company.password,
+        email: company.email,
+        fullName: company.fullName,
+        userType: company.userType,
+        location: company.location,
+        bio: company.bio,
+        rating: company.rating,
+        completedProjects: company.completedProjects,
+        isVerified: company.isVerified
+      };
+      await db.insert(users).values(userData);
+      console.log(`Добавлена компания: ${company.fullName}`);
+    } catch (error) {
+      console.error(`Ошибка при добавлении компании ${company.fullName}:`, error);
+    }
   }
   
   console.log('Top specialists seeded successfully');

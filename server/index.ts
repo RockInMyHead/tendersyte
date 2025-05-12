@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase, seedDatabaseIfEmpty } from "./db-sqlite";
+import { seedTopSpecialists } from "./seed-specialists";
+import { addCompletedProjectsColumn } from "./migrations/add-completed-projects";
 
 const app = express();
 app.use(express.json());
@@ -41,8 +43,14 @@ app.use((req, res, next) => {
   // Инициализируем SQLite базу данных
   initializeDatabase();
   
+  // Добавляем колонку completedProjects, если она отсутствует
+  await addCompletedProjectsColumn();
+  
   // Заполняем тестовыми данными, если база пуста
   seedDatabaseIfEmpty();
+  
+  // Заполняем данными лучших специалистов
+  await seedTopSpecialists();
   
   const server = await registerRoutes(app);
 

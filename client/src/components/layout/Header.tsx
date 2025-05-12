@@ -33,6 +33,7 @@ const Header = () => {
   const navLinks = [
     { href: "/tenders", label: "Тендеры" },
     { href: "/marketplace", label: "Маркетплейс" },
+    { href: "/top-specialists", label: "Лучшие специалисты" },
     { href: "/how-it-works", label: "Как это работает" },
     { href: "/help", label: "Помощь" },
   ];

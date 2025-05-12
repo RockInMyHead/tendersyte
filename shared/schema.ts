@@ -340,6 +340,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true, 
   rating: true, 
   isVerified: true, 
+  completedProjects: true,
   createdAt: true
 });
 

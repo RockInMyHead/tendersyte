@@ -13,6 +13,7 @@ import Profile from "@/pages/Profile";
 import Messages from "@/pages/Messages";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
+import TopSpecialists from "@/pages/TopSpecialists";
 import HowItWorks from "@/pages/HowItWorks";
 import Help from "@/pages/Help";
 import Header from "@/components/layout/Header";
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/messages" component={Messages} />
           <Route path="/register" component={Register} />
           <Route path="/login" component={Login} />
+          <Route path="/top-specialists" component={TopSpecialists} />
           <Route path="/how-it-works" component={HowItWorks} />
           <Route path="/help" component={Help} />
           <Route component={NotFound} />

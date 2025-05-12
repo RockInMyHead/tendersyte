@@ -176,6 +176,7 @@ export class MemStorage implements IStorage {
       id, 
       rating: 0, 
       isVerified: false, 
+      completedProjects: 0,
       createdAt: timestamp 
     };
     this.users.set(id, user);
@@ -189,6 +190,28 @@ export class MemStorage implements IStorage {
     const updatedUser = { ...user, ...userData };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  // Метод для получения лучших специалистов
+  async getTopSpecialists(personType: string): Promise<User[]> {
+    // Фильтруем пользователей по типу (individual или company)
+    const userTypeValue = personType === 'individual' ? 'individual' : 'company';
+    
+    const filteredUsers = Array.from(this.users.values())
+      .filter(user => user.userType === userTypeValue);
+    
+    // Сортируем по рейтингу и количеству завершенных проектов (если есть)
+    return filteredUsers.sort((a, b) => {
+      // Сначала сортируем по рейтингу (по убыванию)
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      }
+      
+      // Если рейтинг одинаковый, сортируем по количеству завершенных проектов (по убыванию)
+      const aCompleted = a.completedProjects || 0;
+      const bCompleted = b.completedProjects || 0;
+      return bCompleted - aCompleted;
+    }).slice(0, 10); // Ограничиваем выборку 10 специалистами
   }
 
   // Tender methods
