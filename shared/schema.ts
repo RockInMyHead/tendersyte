@@ -100,6 +100,7 @@ export const users = pgTable("users", {
   avatar: text("avatar"),
   rating: integer("rating").default(0),
   isVerified: boolean("is_verified").default(false),
+  completedProjects: integer("completed_projects").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
