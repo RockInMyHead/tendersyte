@@ -32,7 +32,9 @@ import {
   MARKETPLACE_CATEGORIES, 
   TENDER_CATEGORIES, 
   LISTING_TYPES,
-  TENDER_STATUSES 
+  TENDER_STATUSES,
+  PERSON_TYPES,
+  PROFESSIONS
 } from '@/lib/constants';
 import { Badge } from '../ui/badge';
 
@@ -51,6 +53,8 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
   const [status, setStatus] = useState(initialFilters.status || '');
   const [minPrice, setMinPrice] = useState(initialFilters.minPrice || 0);
   const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice || 1000000);
+  const [personType, setPersonType] = useState(initialFilters.personType || '');
+  const [selectedProfessions, setSelectedProfessions] = useState<string[]>(initialFilters.requiredProfessions || []);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const handleSearch = () => {
@@ -67,6 +71,8 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
       if (maxPrice < 1000000) filters.maxPrice = maxPrice;
     } else {
       if (status) filters.status = status;
+      if (personType) filters.personType = personType;
+      if (selectedProfessions.length > 0) filters.requiredProfessions = selectedProfessions;
     }
     
     // Calculate active filters for display
@@ -74,6 +80,7 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
     if (category) newActiveFilters.push(`Категория: ${getCategoryLabel(category)}`);
     if (subcategory) newActiveFilters.push(`Подкатегория: ${subcategory}`);
     if (location) newActiveFilters.push(`Местоположение: ${location}`);
+    
     if (type === 'marketplace') {
       if (listingType) newActiveFilters.push(`Тип: ${getListingTypeLabel(listingType)}`);
       if (minPrice > 0 || maxPrice < 1000000) {
@@ -81,6 +88,20 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
       }
     } else {
       if (status) newActiveFilters.push(`Статус: ${getStatusLabel(status)}`);
+      if (personType) newActiveFilters.push(`Тип заказчика: ${getPersonTypeLabel(personType)}`);
+      
+      if (selectedProfessions.length > 0) {
+        const profLabels = selectedProfessions.map(p => {
+          const prof = PROFESSIONS.find(item => item.value === p);
+          return prof ? prof.label : p;
+        });
+        
+        if (profLabels.length === 1) {
+          newActiveFilters.push(`Профессия: ${profLabels[0]}`);
+        } else {
+          newActiveFilters.push(`Профессии: ${profLabels.length}`);
+        }
+      }
     }
     
     setActiveFilters(newActiveFilters);
@@ -101,6 +122,11 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
   const getStatusLabel = (value: string) => {
     const status = TENDER_STATUSES.find(s => s.value === value);
     return status ? status.label : value;
+  };
+  
+  const getPersonTypeLabel = (value: string) => {
+    const personType = PERSON_TYPES.find(p => p.value === value);
+    return personType ? personType.label : value;
   };
 
   const clearFilter = (filter: string) => {
@@ -125,6 +151,13 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
         break;
       case 'Статус':
         setStatus('');
+        break;
+      case 'Тип заказчика':
+        setPersonType('');
+        break;
+      case 'Профессия':
+      case 'Профессии':
+        setSelectedProfessions([]);
         break;
     }
     

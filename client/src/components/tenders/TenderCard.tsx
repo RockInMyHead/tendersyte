@@ -4,8 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StarRating from "@/components/shared/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Tender } from "@/lib/types";
-import { Eye, MapPin } from "lucide-react";
+import { Eye, MapPin, User, Users, Briefcase } from "lucide-react";
 import { cn, formatDate, getUserInitials, getCategoryColor, getStatusColor, getPlaceholderImage } from "@/lib/utils";
+import { PROFESSIONS } from "@/lib/constants";
 
 interface TenderCardProps {
   tender: Tender;
@@ -15,6 +16,12 @@ const TenderCard = ({ tender }: TenderCardProps) => {
   const imageUrl = tender.images && tender.images.length > 0 
     ? tender.images[0] 
     : getPlaceholderImage(tender.category);
+
+  // Получаем названия требуемых профессий
+  const professionLabels = tender.requiredProfessions?.map(profValue => {
+    const profession = PROFESSIONS.find(p => p.value === profValue);
+    return profession ? profession.label : profValue;
+  }) || [];
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -54,6 +61,33 @@ const TenderCard = ({ tender }: TenderCardProps) => {
         <div className="mt-2 text-sm text-gray-500 line-clamp-3">
           {tender.description}
         </div>
+        
+        {/* Тип заказчика */}
+        <div className="mt-3 flex items-center text-sm text-gray-600">
+          {tender.personType === 'individual' 
+            ? <User className="h-4 w-4 mr-1" /> 
+            : <Briefcase className="h-4 w-4 mr-1" />}
+          <span>
+            {tender.personType === 'individual' ? 'Физическое лицо' : 'Юридическое лицо'}
+          </span>
+        </div>
+        
+        {/* Требуемые профессии */}
+        {professionLabels.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {professionLabels.slice(0, 3).map((profession, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {profession}
+              </Badge>
+            ))}
+            {professionLabels.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{professionLabels.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+        
         <div className="mt-4 flex items-start justify-between">
           <div>
             <div className="flex items-center text-sm text-gray-500">
