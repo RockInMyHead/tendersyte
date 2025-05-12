@@ -47,13 +47,13 @@ interface SearchFiltersProps {
 export default function SearchFilters({ type, onSearch, initialFilters = {} }: SearchFiltersProps) {
   const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm || '');
   const [location, setLocation] = useState(initialFilters.location || '');
-  const [category, setCategory] = useState(initialFilters.category || '');
+  const [category, setCategory] = useState(initialFilters.category || 'all');
   const [subcategory, setSubcategory] = useState(initialFilters.subcategory || '');
-  const [listingType, setListingType] = useState(initialFilters.listingType || '');
-  const [status, setStatus] = useState(initialFilters.status || '');
+  const [listingType, setListingType] = useState(initialFilters.listingType || 'all');
+  const [status, setStatus] = useState(initialFilters.status || 'all');
   const [minPrice, setMinPrice] = useState(initialFilters.minPrice || 0);
   const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice || 1000000);
-  const [personType, setPersonType] = useState(initialFilters.personType || '');
+  const [personType, setPersonType] = useState(initialFilters.personType || 'all');
   const [selectedProfessions, setSelectedProfessions] = useState<string[]>(initialFilters.requiredProfessions || []);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
@@ -62,33 +62,33 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
     
     // Add additional filters
     if (location) filters.location = location;
-    if (category) filters.category = category;
+    if (category && category !== 'all') filters.category = category;
     if (subcategory) filters.subcategory = subcategory;
     
     if (type === 'marketplace') {
-      if (listingType) filters.listingType = listingType;
+      if (listingType && listingType !== 'all') filters.listingType = listingType;
       if (minPrice > 0) filters.minPrice = minPrice;
       if (maxPrice < 1000000) filters.maxPrice = maxPrice;
     } else {
-      if (status) filters.status = status;
-      if (personType) filters.personType = personType;
+      if (status && status !== 'all') filters.status = status;
+      if (personType && personType !== 'all') filters.personType = personType;
       if (selectedProfessions.length > 0) filters.requiredProfessions = selectedProfessions;
     }
     
     // Calculate active filters for display
     const newActiveFilters: string[] = [];
-    if (category) newActiveFilters.push(`Категория: ${getCategoryLabel(category)}`);
+    if (category && category !== 'all') newActiveFilters.push(`Категория: ${getCategoryLabel(category)}`);
     if (subcategory) newActiveFilters.push(`Подкатегория: ${subcategory}`);
     if (location) newActiveFilters.push(`Местоположение: ${location}`);
     
     if (type === 'marketplace') {
-      if (listingType) newActiveFilters.push(`Тип: ${getListingTypeLabel(listingType)}`);
+      if (listingType && listingType !== 'all') newActiveFilters.push(`Тип: ${getListingTypeLabel(listingType)}`);
       if (minPrice > 0 || maxPrice < 1000000) {
         newActiveFilters.push(`Цена: ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} ₽`);
       }
     } else {
-      if (status) newActiveFilters.push(`Статус: ${getStatusLabel(status)}`);
-      if (personType) newActiveFilters.push(`Тип заказчика: ${getPersonTypeLabel(personType)}`);
+      if (status && status !== 'all') newActiveFilters.push(`Статус: ${getStatusLabel(status)}`);
+      if (personType && personType !== 'all') newActiveFilters.push(`Тип заказчика: ${getPersonTypeLabel(personType)}`);
       
       if (selectedProfessions.length > 0) {
         const profLabels = selectedProfessions.map(p => {
@@ -168,14 +168,14 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
   };
 
   const clearAllFilters = () => {
-    setCategory('');
+    setCategory('all');
     setSubcategory('');
     setLocation('');
-    setListingType('');
-    setStatus('');
+    setListingType('all');
+    setStatus('all');
     setMinPrice(0);
     setMaxPrice(1000000);
-    setPersonType('');
+    setPersonType('all');
     setSelectedProfessions([]);
     setActiveFilters([]);
     
