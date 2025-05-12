@@ -4,6 +4,7 @@ import { IStorage } from './storage';
 import {
   users, tenders, tenderBids, marketplaceListings, messages, reviews,
   userDocuments, deliveryOptions, deliveryOrders, estimates, estimateItems, designProjects,
+  crews, crewMembers, crewPortfolios, crewMemberSkills,
   type User, type InsertUser,
   type UserDocument, type InsertUserDocument,
   type Tender, type InsertTender,
@@ -15,7 +16,11 @@ import {
   type DeliveryOrder, type InsertDeliveryOrder,
   type Estimate, type InsertEstimate,
   type EstimateItem, type InsertEstimateItem,
-  type DesignProject, type InsertDesignProject
+  type DesignProject, type InsertDesignProject,
+  type Crew, type InsertCrew,
+  type CrewMember, type InsertCrewMember, 
+  type CrewPortfolio, type InsertCrewPortfolio,
+  type CrewMemberSkill, type InsertCrewMemberSkill
 } from '@shared/schema';
 
 // Преобразование строки JSON в массив строк
@@ -771,6 +776,243 @@ export class SQLiteStorage implements IStorage {
       visualizationUrls: parseJsonArray(updatedProject.visualizationUrls as unknown as string),
       projectFiles: parseJsonArray(updatedProject.projectFiles as unknown as string)
     };
+  }
+
+  // Методы для работы с бригадами
+
+  async getCrews(filters?: {
+    location?: string;
+    specialization?: string;
+    experienceYears?: number;
+    isVerified?: boolean;
+    isAvailable?: boolean;
+    searchTerm?: string;
+  }): Promise<Crew[]> {
+    let query = db.select().from(crews);
+    
+    if (filters) {
+      if (filters.location) {
+        query = query.where(like(crews.location, `%${filters.location}%`));
+      }
+      
+      if (filters.specialization) {
+        query = query.where(like(crews.specialization, `%${filters.specialization}%`));
+      }
+      
+      if (filters.experienceYears !== undefined) {
+        query = query.where(sql`${crews.experienceYears} >= ${filters.experienceYears}`);
+      }
+      
+      if (filters.isVerified !== undefined) {
+        query = query.where(eq(crews.isVerified, filters.isVerified));
+      }
+      
+      if (filters.isAvailable !== undefined) {
+        query = query.where(eq(crews.isAvailable, filters.isAvailable));
+      }
+      
+      if (filters.searchTerm) {
+        query = query.where(
+          or(
+            like(crews.name, `%${filters.searchTerm}%`),
+            like(crews.description as any, `%${filters.searchTerm}%`),
+            like(crews.specialization, `%${filters.searchTerm}%`)
+          )
+        );
+      }
+    }
+    
+    return await query;
+  }
+  
+  async getCrew(id: number): Promise<Crew | undefined> {
+    const [crew] = await db.select().from(crews).where(eq(crews.id, id));
+    return crew;
+  }
+  
+  async getCrewsByOwnerId(ownerId: number): Promise<Crew[]> {
+    return await db.select().from(crews).where(eq(crews.ownerId, ownerId));
+  }
+  
+  async createCrew(crew: InsertCrew): Promise<Crew> {
+    const [newCrew] = await db.insert(crews).values(crew).returning();
+    return newCrew;
+  }
+  
+  async updateCrew(id: number, crewData: Partial<Crew>): Promise<Crew | undefined> {
+    const data = { ...crewData, updatedAt: new Date() };
+    
+    const [updatedCrew] = await db
+      .update(crews)
+      .set(data)
+      .where(eq(crews.id, id))
+      .returning();
+    
+    return updatedCrew;
+  }
+  
+  async deleteCrew(id: number): Promise<boolean> {
+    await db.delete(crews).where(eq(crews.id, id));
+    return true;
+  }
+
+  // Методы для работы с участниками бригады
+  
+  async getCrewMembers(crewId: number): Promise<CrewMember[]> {
+    return await db.select().from(crewMembers).where(eq(crewMembers.crewId, crewId));
+  }
+  
+  async getCrewMember(id: number): Promise<CrewMember | undefined> {
+    const [member] = await db.select().from(crewMembers).where(eq(crewMembers.id, id));
+    return member;
+  }
+  
+  async createCrewMember(member: InsertCrewMember): Promise<CrewMember> {
+    const [newMember] = await db.insert(crewMembers).values(member).returning();
+    return newMember;
+  }
+  
+  async updateCrewMember(id: number, memberData: Partial<CrewMember>): Promise<CrewMember | undefined> {
+    const [updatedMember] = await db
+      .update(crewMembers)
+      .set(memberData)
+      .where(eq(crewMembers.id, id))
+      .returning();
+    
+    return updatedMember;
+  }
+  
+  async deleteCrewMember(id: number): Promise<boolean> {
+    await db.delete(crewMembers).where(eq(crewMembers.id, id));
+    return true;
+  }
+
+  // Методы для работы с портфолио бригад
+  
+  async getCrewPortfolios(crewId: number): Promise<CrewPortfolio[]> {
+    const result = await db.select().from(crewPortfolios).where(eq(crewPortfolios.crewId, crewId));
+    
+    // Преобразуем строки JSON в массивы
+    return result.map(portfolio => ({
+      ...portfolio,
+      images: parseJsonArray(portfolio.images as unknown as string)
+    }));
+  }
+  
+  async getCrewPortfolio(id: number): Promise<CrewPortfolio | undefined> {
+    const [portfolio] = await db.select().from(crewPortfolios).where(eq(crewPortfolios.id, id));
+    
+    if (!portfolio) return undefined;
+    
+    // Преобразуем строку JSON в массив
+    return {
+      ...portfolio,
+      images: parseJsonArray(portfolio.images as unknown as string)
+    };
+  }
+  
+  async createCrewPortfolio(portfolio: InsertCrewPortfolio): Promise<CrewPortfolio> {
+    // Преобразуем массив в строку JSON для сохранения
+    const portfolioData = {
+      ...portfolio,
+      images: JSON.stringify(portfolio.images || [])
+    };
+    
+    const [newPortfolio] = await db.insert(crewPortfolios).values(portfolioData).returning();
+    
+    // Преобразуем обратно строку JSON в массив для возврата
+    return {
+      ...newPortfolio,
+      images: parseJsonArray(newPortfolio.images as unknown as string)
+    };
+  }
+  
+  async updateCrewPortfolio(id: number, portfolioData: Partial<CrewPortfolio>): Promise<CrewPortfolio | undefined> {
+    // Если обновляются изображения, преобразуем их в JSON
+    const data = { ...portfolioData };
+    if (data.images) {
+      data.images = JSON.stringify(data.images);
+    }
+    
+    const [updatedPortfolio] = await db
+      .update(crewPortfolios)
+      .set(data)
+      .where(eq(crewPortfolios.id, id))
+      .returning();
+    
+    if (!updatedPortfolio) return undefined;
+    
+    // Преобразуем строку JSON в массив для возврата
+    return {
+      ...updatedPortfolio,
+      images: parseJsonArray(updatedPortfolio.images as unknown as string)
+    };
+  }
+  
+  async deleteCrewPortfolio(id: number): Promise<boolean> {
+    await db.delete(crewPortfolios).where(eq(crewPortfolios.id, id));
+    return true;
+  }
+
+  // Методы для работы с навыками участников бригад
+  
+  async getCrewMemberSkills(memberId: number): Promise<CrewMemberSkill[]> {
+    return await db.select().from(crewMemberSkills).where(eq(crewMemberSkills.memberId, memberId));
+  }
+  
+  async getCrewMemberSkill(id: number): Promise<CrewMemberSkill | undefined> {
+    const [skill] = await db.select().from(crewMemberSkills).where(eq(crewMemberSkills.id, id));
+    return skill;
+  }
+  
+  async createCrewMemberSkill(skill: InsertCrewMemberSkill): Promise<CrewMemberSkill> {
+    const [newSkill] = await db.insert(crewMemberSkills).values(skill).returning();
+    return newSkill;
+  }
+  
+  async updateCrewMemberSkill(id: number, skillData: Partial<CrewMemberSkill>): Promise<CrewMemberSkill | undefined> {
+    const [updatedSkill] = await db
+      .update(crewMemberSkills)
+      .set(skillData)
+      .where(eq(crewMemberSkills.id, id))
+      .returning();
+    
+    return updatedSkill;
+  }
+  
+  async deleteCrewMemberSkill(id: number): Promise<boolean> {
+    await db.delete(crewMemberSkills).where(eq(crewMemberSkills.id, id));
+    return true;
+  }
+
+  // Расширенные методы для работы с тендерами (с учетом новых полей)
+  
+  async getTendersByPersonType(personType: string): Promise<Tender[]> {
+    const result = await db.select().from(tenders).where(eq(tenders.personType as any, personType));
+    
+    // Преобразуем строки JSON в массивы
+    return result.map(tender => ({
+      ...tender,
+      images: parseJsonArray(tender.images as unknown as string),
+      requiredProfessions: parseJsonArray(tender.requiredProfessions as unknown as string)
+    }));
+  }
+  
+  async getTendersByRequiredProfession(profession: string): Promise<Tender[]> {
+    const result = await db.select().from(tenders);
+    
+    // Фильтрация на стороне приложения, т.к. SQLite не поддерживает поиск внутри JSON
+    const filteredTenders = result.filter(tender => {
+      const professions = parseJsonArray(tender.requiredProfessions as unknown as string);
+      return professions.includes(profession);
+    });
+    
+    // Преобразуем строки JSON в массивы
+    return filteredTenders.map(tender => ({
+      ...tender,
+      images: parseJsonArray(tender.images as unknown as string),
+      requiredProfessions: parseJsonArray(tender.requiredProfessions as unknown as string)
+    }));
   }
 }
 

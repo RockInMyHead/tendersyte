@@ -9,6 +9,38 @@ export const userTypeEnum = pgEnum('user_type', [
   'company'     // юридическое лицо (поставщик)
 ]);
 
+export const personTypeEnum = pgEnum('person_type', [
+  'individual', // физическое лицо
+  'legal'       // юридическое лицо
+]);
+
+export const professionEnum = pgEnum('profession', [
+  'carpenter',           // плотник
+  'plumber',             // сантехник
+  'electrician',         // электрик
+  'painter',             // маляр
+  'bricklayer',          // каменщик
+  'welder',              // сварщик
+  'concrete_worker',     // бетонщик
+  'crane_operator',      // крановщик
+  'bulldozer_operator',  // бульдозерист
+  'architect',           // архитектор
+  'engineer',            // инженер
+  'surveyor',            // геодезист
+  'landscaper',          // ландшафтный дизайнер
+  'interior_designer',   // дизайнер интерьеров
+  'project_manager',     // руководитель проекта
+  'foreman',             // прораб
+  'roofer',              // кровельщик
+  'flooring_specialist', // специалист по напольным покрытиям
+  'hvac_technician',     // специалист по вентиляции и кондиционированию
+  'security_systems',    // специалист по системам безопасности
+  'insulation_specialist', // специалист по утеплению
+  'demolition_worker',   // специалист по сносу
+  'glazier',             // стекольщик
+  'other'                // другое
+]);
+
 export const tenderStatusEnum = pgEnum('tender_status', [
   'open', 'in_progress', 'completed', 'canceled'
 ]);
@@ -83,6 +115,8 @@ export const tenders = pgTable("tenders", {
   deadline: timestamp("deadline").notNull(),
   status: tenderStatusEnum("status").notNull().default('open'),
   userId: integer("user_id").notNull().references(() => users.id),
+  personType: personTypeEnum("person_type").notNull().default('individual'),
+  requiredProfessions: json("required_professions").$type<string[]>().default([]),
   images: json("images").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -233,6 +267,73 @@ export const designProjects = pgTable("design_projects", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Бригады
+export const crews = pgTable("crews", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  ownerId: integer("owner_id").notNull().references(() => users.id),
+  location: text("location").notNull(),
+  specialization: text("specialization").notNull(),
+  experienceYears: integer("experience_years"),
+  rating: integer("rating").default(0),
+  completedProjects: integer("completed_projects").default(0),
+  avatar: text("avatar"),
+  contactPhone: text("contact_phone"),
+  contactEmail: text("contact_email"),
+  isVerified: boolean("is_verified").default(false),
+  isAvailable: boolean("is_available").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Участники бригады
+export const crewMembers = pgTable("crew_members", {
+  id: serial("id").primaryKey(),
+  crewId: integer("crew_id").notNull().references(() => crews.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  fullName: text("full_name").notNull(),
+  profession: professionEnum("profession").notNull(),
+  experienceYears: integer("experience_years"),
+  specialization: text("specialization"),
+  isLeader: boolean("is_leader").default(false),
+  bio: text("bio"),
+  avatar: text("avatar"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Портфолио бригад
+export const crewPortfolios = pgTable("crew_portfolios", {
+  id: serial("id").primaryKey(),
+  crewId: integer("crew_id").notNull().references(() => crews.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  projectType: text("project_type").notNull(), // construction, repair, etc.
+  location: text("location"),
+  completionDate: timestamp("completion_date"),
+  clientName: text("client_name"),
+  clientReview: text("client_review"),
+  clientRating: integer("client_rating"),
+  budget: integer("budget"),
+  duration: integer("duration"), // in days
+  images: json("images").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Профессиональные навыки участников бригад
+export const crewMemberSkills = pgTable("crew_member_skills", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => crewMembers.id),
+  skillName: text("skill_name").notNull(),
+  proficiency: integer("proficiency").notNull(), // 1-5
+  years: integer("years"),
+  description: text("description"),
+  isCertified: boolean("is_certified").default(false),
+  certificationName: text("certification_name"),
+  certificationDate: timestamp("certification_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true, 
@@ -311,6 +412,30 @@ export const insertDesignProjectSchema = createInsertSchema(designProjects).omit
   updatedAt: true
 });
 
+export const insertCrewSchema = createInsertSchema(crews).omit({
+  id: true,
+  rating: true,
+  completedProjects: true,
+  isVerified: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertCrewMemberSchema = createInsertSchema(crewMembers).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertCrewPortfolioSchema = createInsertSchema(crewPortfolios).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertCrewMemberSkillSchema = createInsertSchema(crewMemberSkills).omit({
+  id: true,
+  createdAt: true
+});
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -347,3 +472,15 @@ export type InsertEstimateItem = z.infer<typeof insertEstimateItemSchema>;
 
 export type DesignProject = typeof designProjects.$inferSelect;
 export type InsertDesignProject = z.infer<typeof insertDesignProjectSchema>;
+
+export type Crew = typeof crews.$inferSelect;
+export type InsertCrew = z.infer<typeof insertCrewSchema>;
+
+export type CrewMember = typeof crewMembers.$inferSelect;
+export type InsertCrewMember = z.infer<typeof insertCrewMemberSchema>;
+
+export type CrewPortfolio = typeof crewPortfolios.$inferSelect;
+export type InsertCrewPortfolio = z.infer<typeof insertCrewPortfolioSchema>;
+
+export type CrewMemberSkill = typeof crewMemberSkills.$inferSelect;
+export type InsertCrewMemberSkill = z.infer<typeof insertCrewMemberSkillSchema>;
