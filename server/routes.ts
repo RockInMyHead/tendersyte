@@ -122,6 +122,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // User routes
+  apiRouter.get('/users/top', async (req: Request, res: Response) => {
+    try {
+      const userType = req.query.type as string;
+      if (!userType || (userType !== 'individual' && userType !== 'legal')) {
+        return res.status(400).json({ message: "Invalid user type" });
+      }
+      
+      // Получаем лучших специалистов по рейтингу и количеству выполненных проектов
+      const topSpecialists = await storage.getTopSpecialists(userType);
+      
+      // Удаляем пароли из ответа
+      const specialistsWithoutPasswords = topSpecialists.map(specialist => {
+        const { password, ...specialistWithoutPassword } = specialist;
+        return specialistWithoutPassword;
+      });
+      
+      res.status(200).json(specialistsWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  });
+  
   apiRouter.get('/users/me', authMiddleware, async (req: Request, res: Response) => {
     try {
       const user = await storage.getUser(req.user.id);

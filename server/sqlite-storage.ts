@@ -83,6 +83,23 @@ export class SQLiteStorage implements IStorage {
       .returning();
     return updatedUser;
   }
+  
+  async getTopSpecialists(personType: string): Promise<User[]> {
+    // Тип персоны: 'individual' или 'legal'
+    const userTypeValue = personType === 'individual' ? 'individual' : 'company';
+    
+    // Получаем пользователей соответствующего типа, сортированных по рейтингу и количеству завершенных проектов
+    const topUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.userType, userTypeValue))
+      .orderBy(
+        sql`${users.rating} DESC, ${users.completedProjects} DESC`
+      )
+      .limit(10); // Ограничиваем результаты до 10 пользователей
+    
+    return topUsers;
+  }
 
   // Методы для работы с документами пользователей
   

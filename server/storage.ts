@@ -22,6 +22,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
+  getTopSpecialists(personType: string): Promise<User[]>;
   
   // User documents methods
   getUserDocuments(userId: number): Promise<UserDocument[]>;
