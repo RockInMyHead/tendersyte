@@ -243,7 +243,7 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
                         <SelectValue placeholder="Выберите категорию" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Все категории</SelectItem>
+                        <SelectItem value="all">Все категории</SelectItem>
                         {(type === 'marketplace' ? MARKETPLACE_CATEGORIES : TENDER_CATEGORIES).map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>
                             {cat.label}
@@ -262,7 +262,7 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
                             <SelectValue placeholder="Все типы" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Все типы</SelectItem>
+                            <SelectItem value="all">Все типы</SelectItem>
                             {LISTING_TYPES.map((type) => (
                               <SelectItem key={type.value} value={type.value}>
                                 {type.label}
@@ -313,7 +313,7 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
                             <SelectValue placeholder="Все статусы" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Все статусы</SelectItem>
+                            <SelectItem value="all">Все статусы</SelectItem>
                             {TENDER_STATUSES.map((status) => (
                               <SelectItem key={status.value} value={status.value}>
                                 {status.label}
@@ -330,7 +330,7 @@ export default function SearchFilters({ type, onSearch, initialFilters = {} }: S
                             <SelectValue placeholder="Все заказчики" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Все заказчики</SelectItem>
+                            <SelectItem value="all">Все заказчики</SelectItem>
                             {PERSON_TYPES.map((type) => (
                               <SelectItem key={type.value} value={type.value}>
                                 {type.label}
