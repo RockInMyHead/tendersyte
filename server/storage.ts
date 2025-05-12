@@ -1,11 +1,18 @@
 import {
   users, tenders, tenderBids, marketplaceListings, messages, reviews,
+  userDocuments, deliveryOptions, deliveryOrders, estimates, estimateItems, designProjects,
   type User, type InsertUser,
+  type UserDocument, type InsertUserDocument,
   type Tender, type InsertTender,
   type TenderBid, type InsertTenderBid,
   type MarketplaceListing, type InsertMarketplaceListing,
   type Message, type InsertMessage,
-  type Review, type InsertReview
+  type Review, type InsertReview,
+  type DeliveryOption, type InsertDeliveryOption,
+  type DeliveryOrder, type InsertDeliveryOrder,
+  type Estimate, type InsertEstimate,
+  type EstimateItem, type InsertEstimateItem,
+  type DesignProject, type InsertDesignProject
 } from "@shared/schema";
 
 export interface IStorage {
@@ -15,6 +22,14 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
+  
+  // User documents methods
+  getUserDocuments(userId: number): Promise<UserDocument[]>;
+  getUserDocument(id: number): Promise<UserDocument | undefined>;
+  createUserDocument(document: InsertUserDocument): Promise<UserDocument>;
+  updateUserDocument(id: number, documentData: Partial<UserDocument>): Promise<UserDocument | undefined>;
+  deleteUserDocument(id: number): Promise<boolean>;
+  verifyUserDocument(id: number, isVerified: boolean): Promise<UserDocument | undefined>;
   
   // Tender methods
   getTenders(filters?: {
@@ -63,6 +78,45 @@ export interface IStorage {
   getUserReviews(userId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
   updateUserRating(userId: number): Promise<number>;
+  
+  // Delivery options methods
+  getDeliveryOptions(): Promise<DeliveryOption[]>;
+  getDeliveryOption(id: number): Promise<DeliveryOption | undefined>;
+  createDeliveryOption(option: InsertDeliveryOption): Promise<DeliveryOption>;
+  updateDeliveryOption(id: number, optionData: Partial<DeliveryOption>): Promise<DeliveryOption | undefined>;
+  deleteDeliveryOption(id: number): Promise<boolean>;
+  
+  // Delivery orders methods
+  getDeliveryOrders(userId?: number): Promise<DeliveryOrder[]>;
+  getDeliveryOrder(id: number): Promise<DeliveryOrder | undefined>;
+  createDeliveryOrder(order: InsertDeliveryOrder): Promise<DeliveryOrder>;
+  updateDeliveryOrderStatus(id: number, status: string): Promise<DeliveryOrder | undefined>;
+  updateDeliveryOrderTracking(id: number, trackingCode: string): Promise<DeliveryOrder | undefined>;
+  
+  // Estimate methods
+  getEstimates(userId?: number, tenderId?: number): Promise<Estimate[]>;
+  getEstimate(id: number): Promise<Estimate | undefined>;
+  createEstimate(estimate: InsertEstimate): Promise<Estimate>;
+  updateEstimate(id: number, estimateData: Partial<Estimate>): Promise<Estimate | undefined>;
+  deleteEstimate(id: number): Promise<boolean>;
+  updateEstimateStatus(id: number, status: string): Promise<Estimate | undefined>;
+  
+  // Estimate items methods
+  getEstimateItems(estimateId: number): Promise<EstimateItem[]>;
+  getEstimateItem(id: number): Promise<EstimateItem | undefined>;
+  createEstimateItem(item: InsertEstimateItem): Promise<EstimateItem>;
+  updateEstimateItem(id: number, itemData: Partial<EstimateItem>): Promise<EstimateItem | undefined>;
+  deleteEstimateItem(id: number): Promise<boolean>;
+  
+  // Design project methods
+  getDesignProjects(userId?: number): Promise<DesignProject[]>;
+  getDesignProject(id: number): Promise<DesignProject | undefined>;
+  createDesignProject(project: InsertDesignProject): Promise<DesignProject>;
+  updateDesignProject(id: number, projectData: Partial<DesignProject>): Promise<DesignProject | undefined>;
+  deleteDesignProject(id: number): Promise<boolean>;
+  updateDesignProjectStatus(id: number, status: string): Promise<DesignProject | undefined>;
+  addProjectVisualization(id: number, visualizationUrl: string): Promise<DesignProject | undefined>;
+  addProjectFile(id: number, fileUrl: string): Promise<DesignProject | undefined>;
 }
 
 export class MemStorage implements IStorage {

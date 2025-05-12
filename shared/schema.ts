@@ -3,15 +3,55 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enum definitions
-export const userTypeEnum = pgEnum('user_type', ['individual', 'contractor', 'company']);
-export const tenderStatusEnum = pgEnum('tender_status', ['open', 'in_progress', 'completed', 'canceled']);
-export const listingTypeEnum = pgEnum('listing_type', ['sell', 'rent', 'buy']);
-export const categoryEnum = pgEnum('category', ['equipment', 'materials', 'tools', 'services']);
+export const userTypeEnum = pgEnum('user_type', [
+  'individual', // физическое лицо (заказчик)
+  'contractor', // подрядчик (бригада)
+  'company'     // юридическое лицо (поставщик)
+]);
+
+export const tenderStatusEnum = pgEnum('tender_status', [
+  'open', 'in_progress', 'completed', 'canceled'
+]);
+
+export const listingTypeEnum = pgEnum('listing_type', [
+  'sell', 'rent', 'buy'
+]);
+
+export const categoryEnum = pgEnum('category', [
+  'equipment',  // оборудование
+  'materials',  // материалы
+  'tools',      // инструменты
+  'services',   // услуги
+  'property',   // недвижимость (для аренды площадей)
+  'transport'   // транспорт (для логистики)
+]);
+
+export const serviceTypeEnum = pgEnum('service_type', [
+  'construction',  // строительство
+  'repair',        // ремонт
+  'design',        // дизайн
+  'transportation', // перевозки
+  'installation',  // монтаж
+  'consulting'     // консультации
+]);
+
 export const subcategoryEnum = pgEnum('subcategory', [
+  // Оборудование
   'excavators', 'loaders', 'cranes', 'trucks', 'concrete_mixers',
-  'bricks', 'cement', 'wood', 'metal', 'paint',
+  
+  // Материалы
+  'bricks', 'cement', 'wood', 'metal', 'paint', 'sand', 
+  'panels', 'windows', 'doors', 'rare_stones', 'parquet', 'stairs',
+  
+  // Инструменты
   'power_tools', 'hand_tools', 'measuring_tools', 'ladders', 'scaffolding',
-  'repair', 'construction', 'design', 'demolition', 'cleaning'
+  
+  // Услуги
+  'repair', 'construction', 'design', 'demolition', 'cleaning',
+  'moving_services', 'consulting', 'installation', 'plumbing', 'electrical',
+  
+  // Другое
+  'furniture', 'dsv', 'mdf', 'solid_wood', 'other'
 ]);
 
 // Users table
@@ -102,6 +142,97 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Документы пользователей (лицензии, сертификаты)
+export const userDocuments = pgTable("user_documents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  documentType: text("document_type").notNull(), // license, certificate, etc.
+  documentNumber: text("document_number"),
+  issueDate: timestamp("issue_date"),
+  expiryDate: timestamp("expiry_date"),
+  documentUrl: text("document_url"), // ссылка на документ
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Логистика и доставка
+export const deliveryOptions = pgTable("delivery_options", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Название опции доставки
+  description: text("description"),
+  maxWeight: integer("max_weight"), // максимальный вес в кг
+  maxVolume: integer("max_volume"), // максимальный объем в м³
+  pricePerKm: integer("price_per_km"), // цена за км
+  basePrice: integer("base_price"), // базовая цена
+  hasLoaders: boolean("has_loaders").default(false), // есть ли грузчики
+  isActive: boolean("is_active").default(true),
+});
+
+// Заказы доставки
+export const deliveryOrders = pgTable("delivery_orders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  listingId: integer("listing_id").references(() => marketplaceListings.id),
+  deliveryOptionId: integer("delivery_option_id").references(() => deliveryOptions.id),
+  fromAddress: text("from_address").notNull(),
+  toAddress: text("to_address").notNull(),
+  distance: integer("distance"), // расстояние в км
+  weight: integer("weight"), // вес в кг
+  volume: integer("volume"), // объем в м³
+  totalPrice: integer("total_price").notNull(),
+  status: text("status").notNull().default('pending'), // pending, in_progress, completed, canceled
+  scheduledDate: timestamp("scheduled_date"),
+  trackingCode: text("tracking_code"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Сметы проектов
+export const estimates = pgTable("estimates", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  tenderId: integer("tender_id").references(() => tenders.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  totalCost: integer("total_cost").notNull(),
+  projectType: text("project_type").notNull(), // repair, construction, etc.
+  area: integer("area"), // площадь в м²
+  materialsIncluded: boolean("materials_included").default(true),
+  estimatedDuration: integer("estimated_duration"), // в днях
+  documentUrl: text("document_url"), // ссылка на PDF
+  status: text("status").notNull().default('draft'), // draft, final, approved, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Позиции сметы
+export const estimateItems = pgTable("estimate_items", {
+  id: serial("id").primaryKey(),
+  estimateId: integer("estimate_id").notNull().references(() => estimates.id),
+  name: text("name").notNull(),
+  quantity: integer("quantity").notNull(),
+  unit: text("unit").notNull(), // шт, м², м³, и т.д.
+  unitPrice: integer("unit_price").notNull(),
+  totalPrice: integer("total_price").notNull(),
+  category: text("category"), // materials, work, equipment, etc.
+  description: text("description"),
+});
+
+// Проекты дизайна
+export const designProjects = pgTable("design_projects", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // interior, exterior, landscape, etc.
+  area: integer("area"), // площадь в м²
+  status: text("status").notNull().default('in_progress'), // in_progress, completed
+  visualizationUrls: json("visualization_urls").$type<string[]>().default([]),
+  projectFiles: json("project_files").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true, 
@@ -143,6 +274,43 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true
 });
 
+export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({
+  id: true,
+  isVerified: true,
+  createdAt: true
+});
+
+export const insertDeliveryOptionSchema = createInsertSchema(deliveryOptions).omit({
+  id: true,
+  isActive: true
+});
+
+export const insertDeliveryOrderSchema = createInsertSchema(deliveryOrders).omit({
+  id: true,
+  status: true,
+  trackingCode: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertEstimateSchema = createInsertSchema(estimates).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertEstimateItemSchema = createInsertSchema(estimateItems).omit({
+  id: true
+});
+
+export const insertDesignProjectSchema = createInsertSchema(designProjects).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -161,3 +329,21 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type UserDocument = typeof userDocuments.$inferSelect;
+export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
+
+export type DeliveryOption = typeof deliveryOptions.$inferSelect;
+export type InsertDeliveryOption = z.infer<typeof insertDeliveryOptionSchema>;
+
+export type DeliveryOrder = typeof deliveryOrders.$inferSelect;
+export type InsertDeliveryOrder = z.infer<typeof insertDeliveryOrderSchema>;
+
+export type Estimate = typeof estimates.$inferSelect;
+export type InsertEstimate = z.infer<typeof insertEstimateSchema>;
+
+export type EstimateItem = typeof estimateItems.$inferSelect;
+export type InsertEstimateItem = z.infer<typeof insertEstimateItemSchema>;
+
+export type DesignProject = typeof designProjects.$inferSelect;
+export type InsertDesignProject = z.infer<typeof insertDesignProjectSchema>;
