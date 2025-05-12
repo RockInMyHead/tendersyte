@@ -124,9 +124,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   apiRouter.get('/users/top', async (req: Request, res: Response) => {
     try {
-      const userType = req.query.type as string;
-      if (!userType || (userType !== 'individual' && userType !== 'legal')) {
-        return res.status(400).json({ message: "Invalid user type" });
+      const userType = req.query.personType as string;
+      if (!userType || (userType !== 'individual' && userType !== 'company' && userType !== 'legal')) {
+        return res.status(400).json({ message: "Invalid user type", receivedType: userType });
       }
       
       // Получаем лучших специалистов по рейтингу и количеству выполненных проектов
