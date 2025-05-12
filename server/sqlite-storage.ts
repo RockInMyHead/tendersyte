@@ -1,0 +1,759 @@
+import { eq, and, like, or, between, sql } from 'drizzle-orm';
+import { db } from './db-sqlite';
+import { IStorage } from './storage';
+import {
+  users, tenders, tenderBids, marketplaceListings, messages, reviews,
+  userDocuments, deliveryOptions, deliveryOrders, estimates, estimateItems, designProjects,
+  type User, type InsertUser,
+  type UserDocument, type InsertUserDocument,
+  type Tender, type InsertTender,
+  type TenderBid, type InsertTenderBid,
+  type MarketplaceListing, type InsertMarketplaceListing,
+  type Message, type InsertMessage,
+  type Review, type InsertReview,
+  type DeliveryOption, type InsertDeliveryOption,
+  type DeliveryOrder, type InsertDeliveryOrder,
+  type Estimate, type InsertEstimate,
+  type EstimateItem, type InsertEstimateItem,
+  type DesignProject, type InsertDesignProject
+} from '@shared/schema';
+
+// Преобразование строки JSON в массив строк
+function parseJsonArray(json: string | null): string[] {
+  if (!json) return [];
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('Failed to parse JSON:', e);
+    return [];
+  }
+}
+
+export class SQLiteStorage implements IStorage {
+  // Методы для работы с пользователями
+  
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+  
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  // Методы для работы с документами пользователей
+  
+  async getUserDocuments(userId: number): Promise<UserDocument[]> {
+    return await db.select().from(userDocuments).where(eq(userDocuments.userId, userId));
+  }
+  
+  async getUserDocument(id: number): Promise<UserDocument | undefined> {
+    const [document] = await db.select().from(userDocuments).where(eq(userDocuments.id, id));
+    return document;
+  }
+  
+  async createUserDocument(document: InsertUserDocument): Promise<UserDocument> {
+    const [newDocument] = await db.insert(userDocuments).values(document).returning();
+    return newDocument;
+  }
+  
+  async updateUserDocument(id: number, documentData: Partial<UserDocument>): Promise<UserDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(userDocuments)
+      .set(documentData)
+      .where(eq(userDocuments.id, id))
+      .returning();
+    return updatedDocument;
+  }
+  
+  async deleteUserDocument(id: number): Promise<boolean> {
+    await db.delete(userDocuments).where(eq(userDocuments.id, id));
+    return true;
+  }
+  
+  async verifyUserDocument(id: number, isVerified: boolean): Promise<UserDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(userDocuments)
+      .set({ isVerified })
+      .where(eq(userDocuments.id, id))
+      .returning();
+    return updatedDocument;
+  }
+
+  // Методы для работы с тендерами
+  
+  async getTenders(filters?: {
+    category?: string;
+    location?: string;
+    status?: string;
+    userId?: number;
+    searchTerm?: string;
+  }): Promise<Tender[]> {
+    let query = db.select().from(tenders);
+    
+    if (filters) {
+      if (filters.category) {
+        query = query.where(eq(tenders.category, filters.category));
+      }
+      
+      if (filters.location) {
+        query = query.where(like(tenders.location, `%${filters.location}%`));
+      }
+      
+      if (filters.status) {
+        query = query.where(eq(tenders.status, filters.status));
+      }
+      
+      if (filters.userId) {
+        query = query.where(eq(tenders.userId, filters.userId));
+      }
+      
+      if (filters.searchTerm) {
+        query = query.where(
+          or(
+            like(tenders.title, `%${filters.searchTerm}%`),
+            like(tenders.description, `%${filters.searchTerm}%`)
+          )
+        );
+      }
+    }
+    
+    const result = await query;
+    
+    // Преобразуем строки JSON в массивы
+    return result.map(tender => ({
+      ...tender,
+      images: parseJsonArray(tender.images as unknown as string)
+    }));
+  }
+  
+  async getTender(id: number): Promise<Tender | undefined> {
+    const [tender] = await db.select().from(tenders).where(eq(tenders.id, id));
+    
+    if (!tender) return undefined;
+    
+    // Преобразуем строку JSON в массив
+    return {
+      ...tender,
+      images: parseJsonArray(tender.images as unknown as string)
+    };
+  }
+  
+  async createTender(tender: InsertTender): Promise<Tender> {
+    // Преобразуем массив в строку JSON для сохранения
+    const tenderData = {
+      ...tender,
+      images: JSON.stringify(tender.images || [])
+    };
+    
+    const [newTender] = await db.insert(tenders).values(tenderData).returning();
+    
+    // Преобразуем обратно строку JSON в массив для возврата
+    return {
+      ...newTender,
+      images: parseJsonArray(newTender.images as unknown as string)
+    };
+  }
+  
+  async updateTender(id: number, tenderData: Partial<Tender>): Promise<Tender | undefined> {
+    // Если обновляются изображения, преобразуем их в JSON
+    const data = { ...tenderData };
+    if (data.images) {
+      data.images = JSON.stringify(data.images);
+    }
+    
+    const [updatedTender] = await db
+      .update(tenders)
+      .set(data)
+      .where(eq(tenders.id, id))
+      .returning();
+    
+    if (!updatedTender) return undefined;
+    
+    // Преобразуем строку JSON в массив для возврата
+    return {
+      ...updatedTender,
+      images: parseJsonArray(updatedTender.images as unknown as string)
+    };
+  }
+  
+  async deleteTender(id: number): Promise<boolean> {
+    await db.delete(tenders).where(eq(tenders.id, id));
+    return true;
+  }
+  
+  async incrementTenderViews(id: number): Promise<void> {
+    await db
+      .update(tenders)
+      .set({ viewCount: sql`${tenders.viewCount} + 1` })
+      .where(eq(tenders.id, id));
+  }
+
+  // Методы для работы с заявками на тендеры
+  
+  async getTenderBids(tenderId: number): Promise<TenderBid[]> {
+    return await db.select().from(tenderBids).where(eq(tenderBids.tenderId, tenderId));
+  }
+  
+  async getTenderBid(id: number): Promise<TenderBid | undefined> {
+    const [bid] = await db.select().from(tenderBids).where(eq(tenderBids.id, id));
+    return bid;
+  }
+  
+  async createTenderBid(bid: InsertTenderBid): Promise<TenderBid> {
+    const [newBid] = await db.insert(tenderBids).values(bid).returning();
+    return newBid;
+  }
+  
+  async acceptTenderBid(bidId: number): Promise<TenderBid | undefined> {
+    // Получаем заявку, чтобы узнать ID тендера
+    const [bid] = await db.select().from(tenderBids).where(eq(tenderBids.id, bidId));
+    
+    if (!bid) return undefined;
+    
+    // Обновляем статус тендера на "in_progress"
+    await db
+      .update(tenders)
+      .set({ status: 'in_progress' })
+      .where(eq(tenders.id, bid.tenderId));
+    
+    // Принимаем эту заявку
+    const [updatedBid] = await db
+      .update(tenderBids)
+      .set({ isAccepted: true })
+      .where(eq(tenderBids.id, bidId))
+      .returning();
+    
+    return updatedBid;
+  }
+
+  // Методы для работы с объявлениями маркетплейса
+  
+  async getMarketplaceListings(filters?: {
+    category?: string;
+    subcategory?: string;
+    listingType?: string;
+    location?: string;
+    userId?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    searchTerm?: string;
+  }): Promise<MarketplaceListing[]> {
+    let query = db.select().from(marketplaceListings);
+    
+    if (filters) {
+      if (filters.category) {
+        query = query.where(eq(marketplaceListings.category, filters.category));
+      }
+      
+      if (filters.subcategory) {
+        query = query.where(eq(marketplaceListings.subcategory, filters.subcategory));
+      }
+      
+      if (filters.listingType) {
+        query = query.where(eq(marketplaceListings.listingType, filters.listingType));
+      }
+      
+      if (filters.location) {
+        query = query.where(like(marketplaceListings.location, `%${filters.location}%`));
+      }
+      
+      if (filters.userId) {
+        query = query.where(eq(marketplaceListings.userId, filters.userId));
+      }
+      
+      if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+        query = query.where(
+          between(marketplaceListings.price, filters.minPrice, filters.maxPrice)
+        );
+      } else if (filters.minPrice !== undefined) {
+        query = query.where(sql`${marketplaceListings.price} >= ${filters.minPrice}`);
+      } else if (filters.maxPrice !== undefined) {
+        query = query.where(sql`${marketplaceListings.price} <= ${filters.maxPrice}`);
+      }
+      
+      if (filters.searchTerm) {
+        query = query.where(
+          or(
+            like(marketplaceListings.title, `%${filters.searchTerm}%`),
+            like(marketplaceListings.description, `%${filters.searchTerm}%`)
+          )
+        );
+      }
+    }
+    
+    const result = await query;
+    
+    // Преобразуем строки JSON в массивы
+    return result.map(listing => ({
+      ...listing,
+      images: parseJsonArray(listing.images as unknown as string)
+    }));
+  }
+  
+  async getMarketplaceListing(id: number): Promise<MarketplaceListing | undefined> {
+    const [listing] = await db.select().from(marketplaceListings).where(eq(marketplaceListings.id, id));
+    
+    if (!listing) return undefined;
+    
+    // Преобразуем строку JSON в массив
+    return {
+      ...listing,
+      images: parseJsonArray(listing.images as unknown as string)
+    };
+  }
+  
+  async createMarketplaceListing(listing: InsertMarketplaceListing): Promise<MarketplaceListing> {
+    // Преобразуем массив в строку JSON для сохранения
+    const listingData = {
+      ...listing,
+      images: JSON.stringify(listing.images || [])
+    };
+    
+    const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
+    
+    // Преобразуем обратно строку JSON в массив для возврата
+    return {
+      ...newListing,
+      images: parseJsonArray(newListing.images as unknown as string)
+    };
+  }
+  
+  async updateMarketplaceListing(id: number, listingData: Partial<MarketplaceListing>): Promise<MarketplaceListing | undefined> {
+    // Если обновляются изображения, преобразуем их в JSON
+    const data = { ...listingData };
+    if (data.images) {
+      data.images = JSON.stringify(data.images);
+    }
+    
+    const [updatedListing] = await db
+      .update(marketplaceListings)
+      .set(data)
+      .where(eq(marketplaceListings.id, id))
+      .returning();
+    
+    if (!updatedListing) return undefined;
+    
+    // Преобразуем строку JSON в массив для возврата
+    return {
+      ...updatedListing,
+      images: parseJsonArray(updatedListing.images as unknown as string)
+    };
+  }
+  
+  async deleteMarketplaceListing(id: number): Promise<boolean> {
+    await db.delete(marketplaceListings).where(eq(marketplaceListings.id, id));
+    return true;
+  }
+  
+  async incrementListingViews(id: number): Promise<void> {
+    await db
+      .update(marketplaceListings)
+      .set({ viewCount: sql`${marketplaceListings.viewCount} + 1` })
+      .where(eq(marketplaceListings.id, id));
+  }
+
+  // Методы для работы с сообщениями
+  
+  async getMessages(userId: number): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(
+        or(
+          eq(messages.senderId, userId),
+          eq(messages.receiverId, userId)
+        )
+      )
+      .orderBy(messages.createdAt);
+  }
+  
+  async getConversation(user1Id: number, user2Id: number): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(
+        or(
+          and(
+            eq(messages.senderId, user1Id),
+            eq(messages.receiverId, user2Id)
+          ),
+          and(
+            eq(messages.senderId, user2Id),
+            eq(messages.receiverId, user1Id)
+          )
+        )
+      )
+      .orderBy(messages.createdAt);
+  }
+  
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db.insert(messages).values(message).returning();
+    return newMessage;
+  }
+  
+  async markMessageAsRead(id: number): Promise<Message | undefined> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+
+  // Методы для работы с отзывами
+  
+  async getUserReviews(userId: number): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.recipientId, userId));
+  }
+  
+  async createReview(review: InsertReview): Promise<Review> {
+    const [newReview] = await db.insert(reviews).values(review).returning();
+    return newReview;
+  }
+  
+  async updateUserRating(userId: number): Promise<number> {
+    // Получаем все отзывы о пользователе
+    const userReviews = await db.select().from(reviews).where(eq(reviews.recipientId, userId));
+    
+    if (userReviews.length === 0) return 0;
+    
+    // Вычисляем среднюю оценку
+    const totalRating = userReviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = Math.round(totalRating / userReviews.length);
+    
+    // Обновляем рейтинг пользователя
+    const [updatedUser] = await db
+      .update(users)
+      .set({ rating: averageRating })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser.rating;
+  }
+
+  // Методы для работы с опциями доставки
+  
+  async getDeliveryOptions(): Promise<DeliveryOption[]> {
+    return await db.select().from(deliveryOptions).where(eq(deliveryOptions.isActive, true));
+  }
+  
+  async getDeliveryOption(id: number): Promise<DeliveryOption | undefined> {
+    const [option] = await db.select().from(deliveryOptions).where(eq(deliveryOptions.id, id));
+    return option;
+  }
+  
+  async createDeliveryOption(option: InsertDeliveryOption): Promise<DeliveryOption> {
+    const [newOption] = await db.insert(deliveryOptions).values(option).returning();
+    return newOption;
+  }
+  
+  async updateDeliveryOption(id: number, optionData: Partial<DeliveryOption>): Promise<DeliveryOption | undefined> {
+    const [updatedOption] = await db
+      .update(deliveryOptions)
+      .set(optionData)
+      .where(eq(deliveryOptions.id, id))
+      .returning();
+    return updatedOption;
+  }
+  
+  async deleteDeliveryOption(id: number): Promise<boolean> {
+    await db
+      .update(deliveryOptions)
+      .set({ isActive: false })
+      .where(eq(deliveryOptions.id, id));
+    return true;
+  }
+
+  // Методы для работы с заказами доставки
+  
+  async getDeliveryOrders(userId?: number): Promise<DeliveryOrder[]> {
+    if (userId) {
+      return await db.select().from(deliveryOrders).where(eq(deliveryOrders.userId, userId));
+    }
+    return await db.select().from(deliveryOrders);
+  }
+  
+  async getDeliveryOrder(id: number): Promise<DeliveryOrder | undefined> {
+    const [order] = await db.select().from(deliveryOrders).where(eq(deliveryOrders.id, id));
+    return order;
+  }
+  
+  async createDeliveryOrder(order: InsertDeliveryOrder): Promise<DeliveryOrder> {
+    const [newOrder] = await db.insert(deliveryOrders).values(order).returning();
+    return newOrder;
+  }
+  
+  async updateDeliveryOrderStatus(id: number, status: string): Promise<DeliveryOrder | undefined> {
+    const [updatedOrder] = await db
+      .update(deliveryOrders)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(deliveryOrders.id, id))
+      .returning();
+    return updatedOrder;
+  }
+  
+  async updateDeliveryOrderTracking(id: number, trackingCode: string): Promise<DeliveryOrder | undefined> {
+    const [updatedOrder] = await db
+      .update(deliveryOrders)
+      .set({ trackingCode, updatedAt: new Date() })
+      .where(eq(deliveryOrders.id, id))
+      .returning();
+    return updatedOrder;
+  }
+
+  // Методы для работы со сметами
+  
+  async getEstimates(userId?: number, tenderId?: number): Promise<Estimate[]> {
+    if (userId && tenderId) {
+      return await db
+        .select()
+        .from(estimates)
+        .where(
+          and(
+            eq(estimates.userId, userId),
+            eq(estimates.tenderId, tenderId)
+          )
+        );
+    } else if (userId) {
+      return await db.select().from(estimates).where(eq(estimates.userId, userId));
+    } else if (tenderId) {
+      return await db.select().from(estimates).where(eq(estimates.tenderId, tenderId));
+    }
+    return await db.select().from(estimates);
+  }
+  
+  async getEstimate(id: number): Promise<Estimate | undefined> {
+    const [estimate] = await db.select().from(estimates).where(eq(estimates.id, id));
+    return estimate;
+  }
+  
+  async createEstimate(estimate: InsertEstimate): Promise<Estimate> {
+    const [newEstimate] = await db.insert(estimates).values(estimate).returning();
+    return newEstimate;
+  }
+  
+  async updateEstimate(id: number, estimateData: Partial<Estimate>): Promise<Estimate | undefined> {
+    const data = { ...estimateData, updatedAt: new Date() };
+    
+    const [updatedEstimate] = await db
+      .update(estimates)
+      .set(data)
+      .where(eq(estimates.id, id))
+      .returning();
+    
+    return updatedEstimate;
+  }
+  
+  async deleteEstimate(id: number): Promise<boolean> {
+    await db.delete(estimates).where(eq(estimates.id, id));
+    return true;
+  }
+  
+  async updateEstimateStatus(id: number, status: string): Promise<Estimate | undefined> {
+    const [updatedEstimate] = await db
+      .update(estimates)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(estimates.id, id))
+      .returning();
+    
+    return updatedEstimate;
+  }
+
+  // Методы для работы с позициями сметы
+  
+  async getEstimateItems(estimateId: number): Promise<EstimateItem[]> {
+    return await db.select().from(estimateItems).where(eq(estimateItems.estimateId, estimateId));
+  }
+  
+  async getEstimateItem(id: number): Promise<EstimateItem | undefined> {
+    const [item] = await db.select().from(estimateItems).where(eq(estimateItems.id, id));
+    return item;
+  }
+  
+  async createEstimateItem(item: InsertEstimateItem): Promise<EstimateItem> {
+    const [newItem] = await db.insert(estimateItems).values(item).returning();
+    return newItem;
+  }
+  
+  async updateEstimateItem(id: number, itemData: Partial<EstimateItem>): Promise<EstimateItem | undefined> {
+    const [updatedItem] = await db
+      .update(estimateItems)
+      .set(itemData)
+      .where(eq(estimateItems.id, id))
+      .returning();
+    
+    return updatedItem;
+  }
+  
+  async deleteEstimateItem(id: number): Promise<boolean> {
+    await db.delete(estimateItems).where(eq(estimateItems.id, id));
+    return true;
+  }
+
+  // Методы для работы с дизайн-проектами
+  
+  async getDesignProjects(userId?: number): Promise<DesignProject[]> {
+    if (userId) {
+      return await db.select().from(designProjects).where(eq(designProjects.userId, userId));
+    }
+    return await db.select().from(designProjects);
+  }
+  
+  async getDesignProject(id: number): Promise<DesignProject | undefined> {
+    const [project] = await db.select().from(designProjects).where(eq(designProjects.id, id));
+    
+    if (!project) return undefined;
+    
+    // Преобразуем строки JSON в массивы
+    return {
+      ...project,
+      visualizationUrls: parseJsonArray(project.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(project.projectFiles as unknown as string)
+    };
+  }
+  
+  async createDesignProject(project: InsertDesignProject): Promise<DesignProject> {
+    // Преобразуем массивы в строки JSON для сохранения
+    const projectData = {
+      ...project,
+      visualizationUrls: JSON.stringify(project.visualizationUrls || []),
+      projectFiles: JSON.stringify(project.projectFiles || [])
+    };
+    
+    const [newProject] = await db.insert(designProjects).values(projectData).returning();
+    
+    // Преобразуем обратно строки JSON в массивы для возврата
+    return {
+      ...newProject,
+      visualizationUrls: parseJsonArray(newProject.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(newProject.projectFiles as unknown as string)
+    };
+  }
+  
+  async updateDesignProject(id: number, projectData: Partial<DesignProject>): Promise<DesignProject | undefined> {
+    // Если обновляются массивы, преобразуем их в JSON
+    const data = { ...projectData, updatedAt: new Date() };
+    if (data.visualizationUrls) {
+      data.visualizationUrls = JSON.stringify(data.visualizationUrls);
+    }
+    if (data.projectFiles) {
+      data.projectFiles = JSON.stringify(data.projectFiles);
+    }
+    
+    const [updatedProject] = await db
+      .update(designProjects)
+      .set(data)
+      .where(eq(designProjects.id, id))
+      .returning();
+    
+    if (!updatedProject) return undefined;
+    
+    // Преобразуем строки JSON в массивы для возврата
+    return {
+      ...updatedProject,
+      visualizationUrls: parseJsonArray(updatedProject.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(updatedProject.projectFiles as unknown as string)
+    };
+  }
+  
+  async deleteDesignProject(id: number): Promise<boolean> {
+    await db.delete(designProjects).where(eq(designProjects.id, id));
+    return true;
+  }
+  
+  async updateDesignProjectStatus(id: number, status: string): Promise<DesignProject | undefined> {
+    const [updatedProject] = await db
+      .update(designProjects)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(designProjects.id, id))
+      .returning();
+    
+    if (!updatedProject) return undefined;
+    
+    // Преобразуем строки JSON в массивы для возврата
+    return {
+      ...updatedProject,
+      visualizationUrls: parseJsonArray(updatedProject.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(updatedProject.projectFiles as unknown as string)
+    };
+  }
+  
+  async addProjectVisualization(id: number, visualizationUrl: string): Promise<DesignProject | undefined> {
+    // Получаем текущий проект
+    const [project] = await db.select().from(designProjects).where(eq(designProjects.id, id));
+    
+    if (!project) return undefined;
+    
+    // Получаем текущие визуализации и добавляем новую
+    const currentVisualizations = parseJsonArray(project.visualizationUrls as unknown as string);
+    currentVisualizations.push(visualizationUrl);
+    
+    // Обновляем проект
+    const [updatedProject] = await db
+      .update(designProjects)
+      .set({
+        visualizationUrls: JSON.stringify(currentVisualizations),
+        updatedAt: new Date()
+      })
+      .where(eq(designProjects.id, id))
+      .returning();
+    
+    // Преобразуем строки JSON в массивы для возврата
+    return {
+      ...updatedProject,
+      visualizationUrls: parseJsonArray(updatedProject.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(updatedProject.projectFiles as unknown as string)
+    };
+  }
+  
+  async addProjectFile(id: number, fileUrl: string): Promise<DesignProject | undefined> {
+    // Получаем текущий проект
+    const [project] = await db.select().from(designProjects).where(eq(designProjects.id, id));
+    
+    if (!project) return undefined;
+    
+    // Получаем текущие файлы и добавляем новый
+    const currentFiles = parseJsonArray(project.projectFiles as unknown as string);
+    currentFiles.push(fileUrl);
+    
+    // Обновляем проект
+    const [updatedProject] = await db
+      .update(designProjects)
+      .set({
+        projectFiles: JSON.stringify(currentFiles),
+        updatedAt: new Date()
+      })
+      .where(eq(designProjects.id, id))
+      .returning();
+    
+    // Преобразуем строки JSON в массивы для возврата
+    return {
+      ...updatedProject,
+      visualizationUrls: parseJsonArray(updatedProject.visualizationUrls as unknown as string),
+      projectFiles: parseJsonArray(updatedProject.projectFiles as unknown as string)
+    };
+  }
+}
+
+export const sqliteStorage = new SQLiteStorage();
