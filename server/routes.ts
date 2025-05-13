@@ -37,6 +37,31 @@ function authMiddleware(req: Request, res: Response, next: Function) {
   }
 }
 
+// Middleware для проверки прав администратора
+async function adminMiddleware(req: Request, res: Response, next: Function) {
+  // Сначала проверяем аутентификацию
+  authMiddleware(req, res, async () => {
+    try {
+      // Получаем пользователя из базы данных
+      const user = await storage.getUser(req.user.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Проверяем, является ли пользователь администратором
+      if (!user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      // Если пользователь администратор, разрешаем доступ
+      next();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error: error.message });
+    }
+  });
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
   

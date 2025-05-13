@@ -5,6 +5,7 @@ import { initializeDatabase, seedDatabaseIfEmpty } from "./db-sqlite";
 import { seedTopSpecialists } from "./seed-specialists";
 import { addCompletedProjectsColumn } from "./migrations/add-completed-projects";
 import { addUserFieldsAndGuarantees } from "./migrations/add-user-fields-and-guarantees";
+import { addAdminField } from "./migrations/add-admin-field";
 
 const app = express();
 app.use(express.json());
@@ -49,6 +50,9 @@ app.use((req, res, next) => {
   
   // Добавляем новые поля пользователя и таблицу банковских гарантий
   await addUserFieldsAndGuarantees();
+  
+  // Добавляем поле администратора
+  await addAdminField();
   
   // Заполняем тестовыми данными, если база пуста
   seedDatabaseIfEmpty();
