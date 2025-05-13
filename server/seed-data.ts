@@ -26,11 +26,11 @@ async function seedDatabase() {
         subcategory: 'design',
         location: 'Москва',
         budget: 2500000,
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // через 30 дней
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // через 30 дней
         status: 'open',
         viewCount: 15,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         userId,
@@ -40,11 +40,11 @@ async function seedDatabase() {
         subcategory: 'construction',
         location: 'Санкт-Петербург',
         budget: 500000,
-        deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // через 15 дней
+        deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), // через 15 дней
         status: 'open',
         viewCount: 8,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 дня назад
-        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 дня назад
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
@@ -54,11 +54,11 @@ async function seedDatabase() {
         subcategory: 'bricks',
         location: 'Екатеринбург',
         budget: 1200000,
-        deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // через 10 дней
+        deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // через 10 дней
         status: 'open',
         viewCount: 12,
-        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 дней назад
-        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 дней назад
+        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
@@ -68,11 +68,11 @@ async function seedDatabase() {
         subcategory: 'excavators',
         location: 'Краснодар',
         budget: 150000,
-        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // через 5 дней
+        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // через 5 дней
         status: 'open',
         viewCount: 20,
-        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 дня назад
-        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 дня назад
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
@@ -82,11 +82,11 @@ async function seedDatabase() {
         subcategory: 'repair',
         location: 'Новосибирск',
         budget: 3000000,
-        deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // через 60 дней
+        deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // через 60 дней
         status: 'open',
         viewCount: 25,
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 день назад
-        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 день назад
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
       }
     ];
     
@@ -105,8 +105,8 @@ async function seedDatabase() {
         images: ['https://example.com/crane1.jpg', 'https://example.com/crane2.jpg'],
         isActive: true,
         viewCount: 30,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         userId,
@@ -121,8 +121,8 @@ async function seedDatabase() {
         images: ['https://example.com/mixer1.jpg'],
         isActive: true,
         viewCount: 15,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 дня назад
-        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 дня назад
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
@@ -137,8 +137,8 @@ async function seedDatabase() {
         images: ['https://example.com/brick1.jpg', 'https://example.com/brick2.jpg'],
         isActive: true,
         viewCount: 40,
-        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 дня назад
-        updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 дня назад
+        updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
