@@ -38,7 +38,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 // Тип для банковской гарантии
 interface BankGuarantee {
