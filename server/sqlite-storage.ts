@@ -1,5 +1,5 @@
 import { eq, and, like, or, between, sql } from 'drizzle-orm';
-import { db } from './db-sqlite';
+import { db, sqliteDb } from './db-sqlite';
 import { IStorage } from './storage';
 import {
   users, tenders, tenderBids, marketplaceListings, messages, reviews,
