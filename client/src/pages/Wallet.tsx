@@ -149,7 +149,7 @@ export default function Wallet() {
       return;
     }
     
-    if (user?.walletBalance && parseFloat(withdrawAmount) > user.walletBalance) {
+    if (user && typeof user.walletBalance === 'number' && parseFloat(withdrawAmount) > user.walletBalance) {
       toast({
         title: "Недостаточно средств",
         description: "На счете недостаточно средств для вывода",
@@ -254,28 +254,12 @@ export default function Wallet() {
     }
   };
 
-  // Если пользователь не аутентифицирован
+  // Если пользователь не аутентифицирован, перенаправляем на страницу входа
   if (!isAuthenticated) {
     navigate('/login');
     return null;
   }
-
-  // Если пользователь не найден
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 text-red-500 p-6 rounded-lg text-center">
-          <h2 className="text-xl font-semibold mb-2">Пользователь не найден</h2>
-          <p className="mb-4">Пользователь с указанным идентификатором не существует или был удален.</p>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Вернуться на главную
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <Link href="/profile" className="flex items-center text-blue-600 hover:text-blue-800 mb-6">
@@ -297,7 +281,7 @@ export default function Wallet() {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">
-                {user?.walletBalance ? user.walletBalance.toLocaleString() : "0"} ₽
+                {user && typeof user.walletBalance === 'number' ? user.walletBalance.toLocaleString() : "0"} ₽
               </div>
             </CardContent>
             <CardFooter className="flex flex-wrap gap-2">
