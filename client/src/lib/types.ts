@@ -10,6 +10,10 @@ export interface AuthUser {
   avatar?: string;
   rating: number;
   isVerified: boolean;
+  completedProjects: number;
+  inn?: string;  // ИНН для юр. лиц и подрядчиков
+  website?: string; // Сайт компании или подрядчика
+  walletBalance: number; // Баланс кошелька
   createdAt: string;
 }
 
@@ -85,6 +89,10 @@ export interface User {
   avatar?: string;
   rating: number;
   isVerified: boolean;
+  completedProjects: number;
+  inn?: string;  // ИНН для юр. лиц и подрядчиков
+  website?: string; // Сайт компании или подрядчика
+  walletBalance: number; // Баланс кошелька
   createdAt: string;
 }
 

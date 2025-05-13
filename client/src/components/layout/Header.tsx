@@ -21,7 +21,9 @@ import {
   Search,
   Menu,
   X,
-  Construction
+  Construction,
+  ShieldCheck,
+  Wallet
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -34,6 +36,7 @@ const Header = () => {
     { href: "/tenders", label: "Тендеры" },
     { href: "/marketplace", label: "Маркетплейс" },
     { href: "/top-specialists", label: "Лучшие специалисты" },
+    { href: "/guarantees", label: "Банковские гарантии" },
     { href: "/how-it-works", label: "Как это работает" },
     { href: "/help", label: "Помощь" },
   ];
@@ -112,6 +115,15 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href="/profile/wallet">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        Кошелек
+                        <Badge className="ml-auto bg-green-500 text-white text-xs p-1">
+                          {user?.walletBalance || 0} ₽
+                        </Badge>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href="/messages">
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Сообщения
@@ -122,6 +134,20 @@ const Header = () => {
                         )}
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/guarantees/my">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Мои гарантии
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/guarantees/create">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Оформить гарантию
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/tenders/create">
                         <PlusCircle className="mr-2 h-4 w-4" />
@@ -200,6 +226,16 @@ const Header = () => {
                 Профиль
               </Link>
               <Link
+                href="/profile/wallet"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Кошелек
+                <Badge className="ml-2 bg-green-500 text-white">
+                  {user?.walletBalance || 0} ₽
+                </Badge>
+              </Link>
+              <Link
                 href="/messages"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
                 onClick={() => setMobileMenuOpen(false)}
@@ -210,6 +246,20 @@ const Header = () => {
                     {unreadMessagesCount}
                   </Badge>
                 )}
+              </Link>
+              <Link
+                href="/guarantees/my"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Мои гарантии
+              </Link>
+              <Link
+                href="/guarantees/create"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Оформить гарантию
               </Link>
               <Link
                 href="/tenders/create"
