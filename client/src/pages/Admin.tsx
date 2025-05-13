@@ -250,7 +250,7 @@ export default function Admin() {
                     </TableHeader>
                     <TableBody>
                       {users && users.length > 0 ? (
-                        users.map((user: any) => (
+                        users.map((user) => (
                           <TableRow key={user.id}>
                             <TableCell>{user.id}</TableCell>
                             <TableCell>{user.username}</TableCell>

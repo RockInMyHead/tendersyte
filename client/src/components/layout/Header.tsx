@@ -23,7 +23,8 @@ import {
   X,
   Construction,
   ShieldCheck,
-  Wallet
+  Wallet,
+  Shield
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -159,6 +160,17 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    {user?.isAdmin && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Панель администратора
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Выйти
@@ -273,6 +285,15 @@ const Header = () => {
               >
                 Разместить объявление
               </Link>
+              {user?.isAdmin && (
+                <Link
+                  href="/admin"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Панель администратора
+                </Link>
+              )}
               <button
                 className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
                 onClick={() => {
