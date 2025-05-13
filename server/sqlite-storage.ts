@@ -222,12 +222,12 @@ export class SQLiteStorage implements IStorage {
   
   async createTender(tender: InsertTender): Promise<Tender> {
     // Преобразуем массив в строку JSON для сохранения
-    // и добавляем временные метки для SQLite
+    // и добавляем временные метки для SQLite (в формате ISO строки)
     const tenderData = {
       ...tender,
       images: JSON.stringify(tender.images || []),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     const [newTender] = await db.insert(tenders).values(tenderData).returning();
@@ -285,10 +285,10 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createTenderBid(bid: InsertTenderBid): Promise<TenderBid> {
-    // Добавляем временную метку для SQLite
+    // Добавляем временную метку для SQLite в формате ISO строки
     const bidWithTimestamp = {
       ...bid,
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
     const [newBid] = await db.insert(tenderBids).values(bidWithTimestamp).returning();
     return newBid;
@@ -394,12 +394,12 @@ export class SQLiteStorage implements IStorage {
   
   async createMarketplaceListing(listing: InsertMarketplaceListing): Promise<MarketplaceListing> {
     // Преобразуем массив в строку JSON для сохранения
-    // и добавляем временные метки для SQLite
+    // и добавляем временные метки для SQLite в формате ISO строк
     const listingData = {
       ...listing,
       images: JSON.stringify(listing.images || []),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
@@ -505,10 +505,10 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createReview(review: InsertReview): Promise<Review> {
-    // Добавляем временную метку для SQLite
+    // Добавляем временную метку для SQLite в формате ISO строки
     const reviewWithTimestamp = {
       ...review,
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
     const [newReview] = await db.insert(reviews).values(reviewWithTimestamp).returning();
     return newReview;
