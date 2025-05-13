@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   Card, 
   CardContent, 
@@ -51,11 +51,12 @@ interface Transaction {
 }
 
 export default function Wallet() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [, navigate] = useLocation();
   
   // Временные данные для транзакций
   const mockTransactions: Transaction[] = [
@@ -251,6 +252,28 @@ export default function Wallet() {
         return null;
     }
   };
+
+  // Если пользователь не аутентифицирован
+  if (!isAuthenticated) {
+    navigate('/login');
+    return null;
+  }
+
+  // Если пользователь не найден
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 text-red-500 p-6 rounded-lg text-center">
+          <h2 className="text-xl font-semibold mb-2">Пользователь не найден</h2>
+          <p className="mb-4">Пользователь с указанным идентификатором не существует или был удален.</p>
+          <Button variant="outline" onClick={() => navigate('/')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Вернуться на главную
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
