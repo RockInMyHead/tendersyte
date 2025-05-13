@@ -11,6 +11,7 @@ import MarketplaceItemDetail from "@/pages/MarketplaceItemDetail";
 import MarketplaceItemCreate from "@/pages/MarketplaceItemCreate";
 import Profile from "@/pages/Profile";
 import Messages from "@/pages/Messages";
+import NewMessage from "@/pages/NewMessage";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import TopSpecialists from "@/pages/TopSpecialists";
@@ -41,6 +42,7 @@ function Router() {
           <Route path="/wallet" component={Wallet} />
           <Route path="/profile/:id" component={Profile} />
           <Route path="/messages" component={Messages} />
+          <Route path="/messages/new" component={NewMessage} />
           <Route path="/register" component={Register} />
           <Route path="/login" component={Login} />
           <Route path="/top-specialists" component={TopSpecialists} />
