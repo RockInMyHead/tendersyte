@@ -150,6 +150,11 @@ export async function seedTopSpecialists() {
   // Преобразуем данные перед вставкой, удалив поля, которые вызывают проблемы
   for (const individual of individuals) {
     try {
+      // Convert dates to ISO strings before insertion
+      const now = new Date();
+      const createdAtStr = now.toISOString();
+      const updatedAtStr = now.toISOString();
+      
       const userData = {
         username: individual.username,
         password: individual.password,
@@ -165,10 +170,10 @@ export async function seedTopSpecialists() {
         inn: null,
         website: null,
         walletBalance: 0,
-        createdAt: new Date().toISOString(), // Конвертируем в ISO строку для SQLite 
-        updatedAt: new Date().toISOString() // Конвертируем в ISO строку для SQLite
+        createdAt: createdAtStr, // Используем строковые переменные для дат
+        updatedAt: updatedAtStr  // Используем строковые переменные для дат
       };
-      await db.insert(users).values(userData);
+      await db.insert(users).values([userData]);
       console.log(`Добавлен специалист: ${individual.fullName}`);
     } catch (error) {
       console.error(`Ошибка при добавлении специалиста ${individual.fullName}:`, error);
@@ -177,6 +182,11 @@ export async function seedTopSpecialists() {
   
   for (const company of companies) {
     try {
+      // Convert dates to ISO strings before insertion
+      const now = new Date();
+      const createdAtStr = now.toISOString();
+      const updatedAtStr = now.toISOString();
+      
       const userData = {
         username: company.username,
         password: company.password,
@@ -192,10 +202,10 @@ export async function seedTopSpecialists() {
         inn: company.userType === 'company' ? '7701234567' : null,
         website: company.userType === 'company' ? `https://www.${company.username}.ru` : null,
         walletBalance: 10000, // Добавим начальный баланс для примера
-        createdAt: new Date().toISOString(), // Конвертируем в ISO строку для SQLite
-        updatedAt: new Date().toISOString() // Конвертируем в ISO строку для SQLite
+        createdAt: createdAtStr, // Используем строковые переменные для дат
+        updatedAt: updatedAtStr  // Используем строковые переменные для дат
       };
-      await db.insert(users).values(userData);
+      await db.insert(users).values([userData]);
       console.log(`Добавлена компания: ${company.fullName}`);
     } catch (error) {
       console.error(`Ошибка при добавлении компании ${company.fullName}:`, error);
