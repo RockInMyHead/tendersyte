@@ -109,19 +109,56 @@ export default function GuaranteeCreate() {
     },
   });
 
-  const onSubmit = async (values: GuaranteeFormValues) => {
-    try {
-      // В будущем заменить на реальный API запрос
-      console.log("Submission values:", values);
-      
-      // Имитация успешного создания
+  // Мутация для создания гарантии
+  const createGuaranteeMutation = useMutation({
+    mutationFn: async (data: {
+      customerId: number;
+      contractorId: number;
+      tenderId?: number;
+      amount: number;
+      description: string;
+      terms: string;
+      startDate: string;
+      endDate: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/guarantees", data);
+      return await response.json();
+    },
+    onSuccess: () => {
       toast({
         title: "Гарантия создана",
         description: "Банковская гарантия успешно оформлена",
       });
       
+      // Инвалидация кэша гарантий
+      queryClient.invalidateQueries({ queryKey: ['/api/guarantees'] });
+      
       // Перенаправление на страницу гарантий
       navigate("/guarantees");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Ошибка",
+        description: `Не удалось создать банковскую гарантию: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const onSubmit = async (values: GuaranteeFormValues) => {
+    try {
+      const data = {
+        customerId: parseInt(values.customerId, 10),
+        contractorId: parseInt(values.contractorId, 10),
+        tenderId: values.tenderId ? parseInt(values.tenderId, 10) : undefined,
+        amount: values.amount,
+        description: values.description,
+        terms: values.terms,
+        startDate: values.startDate,
+        endDate: values.endDate
+      };
+      
+      createGuaranteeMutation.mutate(data);
     } catch (error) {
       toast({
         title: "Ошибка",
@@ -165,16 +202,27 @@ export default function GuaranteeCreate() {
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger disabled={isLoadingUsers}>
+                                {isLoadingUsers && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                                 <SelectValue placeholder="Выберите заказчика" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {users.map(user => (
-                                <SelectItem key={user.id} value={user.id.toString()}>
-                                  {user.name}
-                                </SelectItem>
-                              ))}
+                              {isLoadingUsers ? (
+                                <div className="p-2 flex items-center justify-center">
+                                  <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
+                                </div>
+                              ) : usersError ? (
+                                <div className="p-2 text-red-500">Ошибка загрузки пользователей</div>
+                              ) : users.length === 0 ? (
+                                <div className="p-2 text-gray-500">Нет доступных пользователей</div>
+                              ) : (
+                                users.map(user => (
+                                  <SelectItem key={user.id} value={user.id.toString()}>
+                                    {user.fullName || user.username}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <FormDescription>
@@ -196,16 +244,27 @@ export default function GuaranteeCreate() {
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger disabled={isLoadingUsers}>
+                                {isLoadingUsers && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                                 <SelectValue placeholder="Выберите исполнителя" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {users.map(user => (
-                                <SelectItem key={user.id} value={user.id.toString()}>
-                                  {user.name}
-                                </SelectItem>
-                              ))}
+                              {isLoadingUsers ? (
+                                <div className="p-2 flex items-center justify-center">
+                                  <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
+                                </div>
+                              ) : usersError ? (
+                                <div className="p-2 text-red-500">Ошибка загрузки пользователей</div>
+                              ) : users.length === 0 ? (
+                                <div className="p-2 text-gray-500">Нет доступных пользователей</div>
+                              ) : (
+                                users.map(user => (
+                                  <SelectItem key={user.id} value={user.id.toString()}>
+                                    {user.fullName || user.username}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <FormDescription>
