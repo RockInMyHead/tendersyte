@@ -287,17 +287,28 @@ export default function GuaranteeCreate() {
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger disabled={isLoadingTenders}>
+                              {isLoadingTenders && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                               <SelectValue placeholder="Выберите тендер (если есть)" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="">Нет связанного тендера</SelectItem>
-                            {tenders.map(tender => (
-                              <SelectItem key={tender.id} value={tender.id.toString()}>
-                                {tender.title}
-                              </SelectItem>
-                            ))}
+                            {isLoadingTenders ? (
+                              <div className="p-2 flex items-center justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
+                              </div>
+                            ) : tendersError ? (
+                              <div className="p-2 text-red-500">Ошибка загрузки тендеров</div>
+                            ) : tenders.length === 0 ? (
+                              <div className="p-2 text-gray-500">Нет доступных тендеров</div>
+                            ) : (
+                              tenders.map(tender => (
+                                <SelectItem key={tender.id} value={tender.id.toString()}>
+                                  {tender.title}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                         <FormDescription>
@@ -392,8 +403,19 @@ export default function GuaranteeCreate() {
                   </div>
                   
                   <div className="pt-4">
-                    <Button type="submit" className="w-full md:w-auto">
-                      Оформить гарантию
+                    <Button 
+                      type="submit" 
+                      className="w-full md:w-auto"
+                      disabled={createGuaranteeMutation.isPending || isLoadingUsers || isLoadingTenders}
+                    >
+                      {createGuaranteeMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Отправка...
+                        </>
+                      ) : (
+                        "Оформить гарантию"
+                      )}
                     </Button>
                   </div>
                 </form>
