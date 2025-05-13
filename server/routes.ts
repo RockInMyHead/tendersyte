@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(userData.password, salt);
       
-      // Create user
+      // Create user with explicit timestamps for SQLite
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword
