@@ -37,8 +37,6 @@ const Header = () => {
     { href: "/marketplace", label: "Маркетплейс" },
     { href: "/top-specialists", label: "Лучшие специалисты" },
     { href: "/guarantees", label: "Банковские гарантии" },
-    { href: "/how-it-works", label: "Как это работает" },
-    { href: "/help", label: "Помощь" },
   ];
 
   const toggleMobileMenu = () => {
