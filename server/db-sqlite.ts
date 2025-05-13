@@ -17,6 +17,9 @@ const sqlite = new Database(join(dataDir, 'construction-platform.db'));
 // Настройка базы данных для лучшей производительности
 sqlite.pragma('journal_mode = WAL');
 
+// Экспортируем прямой экземпляр SQLite для использования в запросах напрямую
+export const sqliteDb = sqlite;
+
 // Создаем экземпляр Drizzle ORM
 export const db = drizzle(sqlite, { schema });
 

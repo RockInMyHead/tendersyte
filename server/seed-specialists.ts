@@ -1,6 +1,7 @@
-import { db } from './db-sqlite';
+import { db as drizzleDb } from './db-sqlite';
 import { users } from '@shared/schema';
 import bcrypt from 'bcryptjs';
+import { sqliteDb } from './db-sqlite';  // Direct SQLite connection
 
 // Функция для хэширования пароля
 async function hashPassword(password: string): Promise<string> {
@@ -12,7 +13,7 @@ export async function seedTopSpecialists() {
   console.log('Seeding top specialists...');
   
   // Проверяем, не добавлены ли уже тестовые пользователи
-  const existingUsers = await db.select().from(users);
+  const existingUsers = await drizzleDb.select().from(users);
   if (existingUsers.length > 10) {
     console.log('Top specialists data already exists');
     return;
@@ -163,7 +164,7 @@ export async function seedTopSpecialists() {
         bio: individual.bio,
         rating: individual.rating,
         completedProjects: individual.completedProjects,
-        isVerified: individual.isVerified,
+        isVerified: individual.isVerified ? 1 : 0, // Конвертируем boolean в числа для SQLite
         // Добавляем новые поля с пустыми значениями для физ. лиц
         inn: null,
         website: null,
@@ -192,7 +193,7 @@ export async function seedTopSpecialists() {
         bio: company.bio,
         rating: company.rating,
         completedProjects: company.completedProjects,
-        isVerified: company.isVerified,
+        isVerified: company.isVerified ? 1 : 0, // Конвертируем boolean в числа для SQLite
         // Добавляем новые поля для юр. лиц с данными
         inn: userTypeValue === 'company' ? '7701234567' : null,
         website: userTypeValue === 'company' ? `https://www.${company.username}.ru` : null,
