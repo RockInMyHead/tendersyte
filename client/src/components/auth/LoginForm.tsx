@@ -44,7 +44,7 @@ export default function LoginForm() {
         title: 'Успешный вход',
         description: 'Вы успешно вошли в систему',
       });
-      navigate('/');
+      navigate('/profile');
     } catch (error) {
       toast({
         title: 'Ошибка входа',

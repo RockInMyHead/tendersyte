@@ -67,7 +67,7 @@ export default function RegisterForm() {
     setIsSubmitting(true);
     try {
       await register(data);
-      navigate('/');
+      navigate('/profile');
     } catch (error) {
       toast({
         title: 'Ошибка регистрации',
