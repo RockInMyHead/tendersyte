@@ -45,6 +45,10 @@ export default function ChatBox({ userId, onBack, isMobile = false }: ChatBoxPro
     mutationFn: async (messageId: number) => {
       return apiRequest('PUT', `/api/messages/${messageId}/read`, {});
     },
+    onSuccess: () => {
+      // Invalidate messages cache to update unread count in the list
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+    },
   });
 
   // Send message mutation
