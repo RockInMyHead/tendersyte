@@ -649,7 +649,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   apiRouter.post('/guarantees', authMiddleware, async (req: Request, res: Response) => {
     try {
+      console.log('Request body:', req.body);
       const guaranteeData = insertBankGuaranteeSchema.parse(req.body);
+      console.log('Parsed guarantee data:', guaranteeData);
       
       // Allow either the customer or the contractor to create a guarantee
       if (guaranteeData.customerId !== req.user.id && guaranteeData.contractorId !== req.user.id) {
@@ -658,9 +660,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const guarantee = await storage.createBankGuarantee(guaranteeData);
+      // Manually handle dates in guaranteeData
+      const sanitizedData = {
+        ...guaranteeData,
+        startDate: guaranteeData.startDate ? new Date(guaranteeData.startDate) : null,
+        endDate: guaranteeData.endDate ? new Date(guaranteeData.endDate) : null
+      };
+      
+      console.log('Sanitized guarantee data:', sanitizedData);
+      const guarantee = await storage.createBankGuarantee(sanitizedData);
       res.status(201).json(guarantee);
     } catch (error) {
+      console.error('Error creating guarantee:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Validation error", errors: error.errors });
       }

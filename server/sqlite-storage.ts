@@ -1171,8 +1171,8 @@ export class SQLiteStorage implements IStorage {
     // Преобразуем даты в ISO строки для SQLite
     const guaranteeData = {
       ...insertGuarantee,
-      startDate: insertGuarantee.startDate ? new Date(insertGuarantee.startDate).toISOString() : null,
-      endDate: insertGuarantee.endDate ? new Date(insertGuarantee.endDate).toISOString() : null,
+      startDate: insertGuarantee.startDate ? (insertGuarantee.startDate instanceof Date ? insertGuarantee.startDate.toISOString() : new Date(insertGuarantee.startDate).toISOString()) : null,
+      endDate: insertGuarantee.endDate ? (insertGuarantee.endDate instanceof Date ? insertGuarantee.endDate.toISOString() : new Date(insertGuarantee.endDate).toISOString()) : null,
       // Используем SQL NULL для createdAt и updatedAt, чтобы СУБД использовала CURRENT_TIMESTAMP
     };
     
