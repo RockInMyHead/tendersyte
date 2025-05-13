@@ -1126,87 +1126,182 @@ export class SQLiteStorage implements IStorage {
     contractorId?: number; 
     status?: string;
   }): Promise<BankGuarantee[]> {
-    let query = db.select().from(bankGuarantees);
+    // Строим SQL запрос на основе фильтров
+    let sql = `SELECT * FROM bank_guarantees`;
+    const params: any[] = [];
     
     if (filters) {
+      const conditions: string[] = [];
+      
       if (filters.customerId) {
-        query = query.where(eq(bankGuarantees.customerId, filters.customerId));
+        conditions.push(`customer_id = ?`);
+        params.push(filters.customerId);
       }
+      
       if (filters.contractorId) {
-        query = query.where(eq(bankGuarantees.contractorId, filters.contractorId));
+        conditions.push(`contractor_id = ?`);
+        params.push(filters.contractorId);
       }
+      
       if (filters.status) {
-        query = query.where(eq(bankGuarantees.status, filters.status));
+        conditions.push(`status = ?`);
+        params.push(filters.status);
+      }
+      
+      if (conditions.length > 0) {
+        sql += ` WHERE ` + conditions.join(' AND ');
       }
     }
     
-    const guarantees = await query;
+    // Добавляем сортировку - сначала новые
+    sql += ` ORDER BY created_at DESC`;
+    
+    const stmt = sqliteDb.prepare(sql);
+    const guarantees = stmt.all(...params) as any[];
     
     // Преобразуем даты из строк в объекты Date для совместимости с API
     return guarantees.map(guarantee => ({
-      ...guarantee,
-      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
-      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
-      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
-      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+      id: guarantee.id,
+      customerId: guarantee.customer_id,
+      contractorId: guarantee.contractor_id,
+      tenderId: guarantee.tender_id,
+      amount: guarantee.amount,
+      description: guarantee.description,
+      terms: guarantee.terms,
+      startDate: guarantee.start_date ? new Date(guarantee.start_date) : null,
+      endDate: guarantee.end_date ? new Date(guarantee.end_date) : null,
+      status: guarantee.status,
+      createdAt: guarantee.created_at ? new Date(guarantee.created_at) : null,
+      updatedAt: guarantee.updated_at ? new Date(guarantee.updated_at) : null
     }));
   }
 
   async getBankGuarantee(id: number): Promise<BankGuarantee | undefined> {
-    const [guarantee] = await db.select().from(bankGuarantees).where(eq(bankGuarantees.id, id));
+    const stmt = sqliteDb.prepare(`
+      SELECT * FROM bank_guarantees WHERE id = ?
+    `);
+    
+    const guarantee = stmt.get(id) as any;
     
     if (!guarantee) return undefined;
     
     // Преобразуем даты из строк в объекты Date для совместимости с API
     return {
-      ...guarantee,
-      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
-      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
-      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
-      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+      id: guarantee.id,
+      customerId: guarantee.customer_id,
+      contractorId: guarantee.contractor_id,
+      tenderId: guarantee.tender_id,
+      amount: guarantee.amount,
+      description: guarantee.description,
+      terms: guarantee.terms,
+      startDate: guarantee.start_date ? new Date(guarantee.start_date) : null,
+      endDate: guarantee.end_date ? new Date(guarantee.end_date) : null,
+      status: guarantee.status,
+      createdAt: guarantee.created_at ? new Date(guarantee.created_at) : null,
+      updatedAt: guarantee.updated_at ? new Date(guarantee.updated_at) : null
     };
   }
 
   async createBankGuarantee(insertGuarantee: InsertBankGuarantee): Promise<BankGuarantee> {
-    // Преобразуем даты в ISO строки для SQLite
-    const guaranteeData = {
-      ...insertGuarantee,
-      startDate: insertGuarantee.startDate ? (insertGuarantee.startDate instanceof Date ? insertGuarantee.startDate.toISOString() : new Date(insertGuarantee.startDate).toISOString()) : null,
-      endDate: insertGuarantee.endDate ? (insertGuarantee.endDate instanceof Date ? insertGuarantee.endDate.toISOString() : new Date(insertGuarantee.endDate).toISOString()) : null,
-      // Используем SQL NULL для createdAt и updatedAt, чтобы СУБД использовала CURRENT_TIMESTAMP
-    };
+    // Используем прямой SQL запрос для создания гарантии
+    const startDateStr = insertGuarantee.startDate instanceof Date 
+      ? insertGuarantee.startDate.toISOString() 
+      : new Date(insertGuarantee.startDate).toISOString();
+      
+    const endDateStr = insertGuarantee.endDate instanceof Date
+      ? insertGuarantee.endDate.toISOString()
+      : new Date(insertGuarantee.endDate).toISOString();
     
-    const [guarantee] = await db.insert(bankGuarantees).values([guaranteeData]).returning();
+    const now = new Date().toISOString();
+    
+    const insertStmt = sqliteDb.prepare(`
+      INSERT INTO bank_guarantees (
+        customer_id, contractor_id, tender_id, amount, description, 
+        terms, start_date, end_date, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const result = insertStmt.run(
+      insertGuarantee.customerId,
+      insertGuarantee.contractorId,
+      insertGuarantee.tenderId || null,
+      insertGuarantee.amount,
+      insertGuarantee.description,
+      insertGuarantee.terms,
+      startDateStr,
+      endDateStr,
+      insertGuarantee.status || 'pending',
+      now,
+      now
+    );
+    
+    const id = result.lastInsertRowid as number;
+    
+    // Получаем созданную гарантию
+    const selectStmt = sqliteDb.prepare(`
+      SELECT * FROM bank_guarantees WHERE id = ?
+    `);
+    
+    const guarantee = selectStmt.get(id) as any;
     
     // Преобразуем даты из строк в объекты Date для совместимости с API
     return {
-      ...guarantee,
-      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
-      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
-      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
-      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+      id: guarantee.id,
+      customerId: guarantee.customer_id,
+      contractorId: guarantee.contractor_id,
+      tenderId: guarantee.tender_id,
+      amount: guarantee.amount,
+      description: guarantee.description,
+      terms: guarantee.terms,
+      startDate: guarantee.start_date ? new Date(guarantee.start_date) : null,
+      endDate: guarantee.end_date ? new Date(guarantee.end_date) : null,
+      status: guarantee.status,
+      createdAt: guarantee.created_at ? new Date(guarantee.created_at) : null,
+      updatedAt: guarantee.updated_at ? new Date(guarantee.updated_at) : null
     };
   }
 
   async updateBankGuaranteeStatus(id: number, status: string): Promise<BankGuarantee | undefined> {
-    const [guarantee] = await db
-      .update(bankGuarantees)
-      .set({ 
-        status,
-        updatedAt: new Date().toISOString() // Устанавливаем текущую дату и время
-      })
-      .where(eq(bankGuarantees.id, id))
-      .returning();
+    // Проверяем, существует ли гарантия
+    const checkStmt = sqliteDb.prepare(`
+      SELECT * FROM bank_guarantees WHERE id = ?
+    `);
     
-    if (!guarantee) return undefined;
+    const existingGuarantee = checkStmt.get(id);
+    if (!existingGuarantee) return undefined;
+    
+    const now = new Date().toISOString();
+    
+    // Обновляем статус гарантии
+    const updateStmt = sqliteDb.prepare(`
+      UPDATE bank_guarantees
+      SET status = ?, updated_at = ?
+      WHERE id = ?
+    `);
+    
+    updateStmt.run(status, now, id);
+    
+    // Получаем обновленную гарантию
+    const selectStmt = sqliteDb.prepare(`
+      SELECT * FROM bank_guarantees WHERE id = ?
+    `);
+    
+    const guarantee = selectStmt.get(id) as any;
     
     // Преобразуем даты из строк в объекты Date для совместимости с API
     return {
-      ...guarantee,
-      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
-      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
-      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
-      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+      id: guarantee.id,
+      customerId: guarantee.customer_id,
+      contractorId: guarantee.contractor_id,
+      tenderId: guarantee.tender_id,
+      amount: guarantee.amount,
+      description: guarantee.description,
+      terms: guarantee.terms,
+      startDate: guarantee.start_date ? new Date(guarantee.start_date) : null,
+      endDate: guarantee.end_date ? new Date(guarantee.end_date) : null,
+      status: guarantee.status,
+      createdAt: guarantee.created_at ? new Date(guarantee.created_at) : null,
+      updatedAt: guarantee.updated_at ? new Date(guarantee.updated_at) : null
     };
   }
 }
