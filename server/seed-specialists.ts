@@ -165,7 +165,8 @@ export async function seedTopSpecialists() {
         inn: null,
         website: null,
         walletBalance: 0,
-        createdAt: new Date()
+        createdAt: new Date().toISOString(), // Конвертируем в ISO строку для SQLite 
+        updatedAt: new Date().toISOString() // Конвертируем в ISO строку для SQLite
       };
       await db.insert(users).values(userData);
       console.log(`Добавлен специалист: ${individual.fullName}`);
@@ -190,7 +191,9 @@ export async function seedTopSpecialists() {
         // Добавляем новые поля для юр. лиц с данными
         inn: company.userType === 'company' ? '7701234567' : null,
         website: company.userType === 'company' ? `https://www.${company.username}.ru` : null,
-        walletBalance: 10000 // Добавим начальный баланс для примера
+        walletBalance: 10000, // Добавим начальный баланс для примера
+        createdAt: new Date().toISOString(), // Конвертируем в ISO строку для SQLite
+        updatedAt: new Date().toISOString() // Конвертируем в ISO строку для SQLite
       };
       await db.insert(users).values(userData);
       console.log(`Добавлена компания: ${company.fullName}`);

@@ -71,10 +71,11 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createUser(user: InsertUser): Promise<User> {
-    // Явно добавляем временную метку для SQLite
+    // Явно добавляем временную метку для SQLite и конвертируем их в строки для совместимости
     const userWithTimestamp = {
       ...user,
-      createdAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString() // Добавляем updatedAt
     };
     const [newUser] = await db.insert(users).values(userWithTimestamp).returning();
     return newUser;
