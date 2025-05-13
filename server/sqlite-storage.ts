@@ -72,22 +72,54 @@ export class SQLiteStorage implements IStorage {
   
   async createUser(user: InsertUser): Promise<User> {
     // Явно добавляем временную метку для SQLite и конвертируем их в строки для совместимости
+    const now = new Date();
+    const createdAtStr = now.toISOString();
+    const updatedAtStr = now.toISOString();
+    
     const userWithTimestamp = {
       ...user,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString() // Добавляем updatedAt
+      createdAt: createdAtStr,
+      updatedAt: updatedAtStr
     };
-    const [newUser] = await db.insert(users).values(userWithTimestamp).returning();
-    return newUser;
+    
+    try {
+      // Используем массив для values, как требуется в Drizzle ORM
+      const [newUser] = await db.insert(users).values([userWithTimestamp]).returning();
+      return newUser;
+    } catch (error) {
+      console.error('Ошибка при создании пользователя:', error);
+      throw error;
+    }
   }
   
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
-    const [updatedUser] = await db
-      .update(users)
-      .set(userData)
-      .where(eq(users.id, id))
-      .returning();
-    return updatedUser;
+    // Обработка временных меток
+    const updatedData = {...userData};
+    
+    // Если есть поле updatedAt, преобразуем его в строку
+    if ('updatedAt' in updatedData) {
+      if (updatedData.updatedAt instanceof Date) {
+        updatedData.updatedAt = updatedData.updatedAt.toISOString();
+      } else if (updatedData.updatedAt === undefined) {
+        // Если дата не указана, устанавливаем текущую
+        updatedData.updatedAt = new Date().toISOString();
+      }
+    } else {
+      // Если updatedAt не указан, добавляем текущую дату
+      updatedData.updatedAt = new Date().toISOString();
+    }
+    
+    try {
+      const [updatedUser] = await db
+        .update(users)
+        .set(updatedData)
+        .where(eq(users.id, id))
+        .returning();
+      return updatedUser;
+    } catch (error) {
+      console.error('Ошибка при обновлении пользователя:', error);
+      throw error;
+    }
   }
   
   async getTopSpecialists(personType: string): Promise<User[]> {
