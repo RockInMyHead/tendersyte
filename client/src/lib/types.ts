@@ -137,16 +137,18 @@ export interface RegisterFormData {
 }
 
 export interface TenderFormData {
+  id?: number;
   title: string;
   description: string;
   category: string;
   subcategory?: string;
   budget?: number;
   location: string;
-  deadline: string;
+  deadline: string | Date;
   images?: string[];
   personType: 'individual' | 'legal_entity';
   requiredProfessions?: string[];
+  userId?: number;
 }
 
 export interface TenderBidFormData {

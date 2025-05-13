@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocation } from 'wouter';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useAuth } from '@/lib/authContext';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -34,10 +35,10 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { TENDER_CATEGORIES } from '@/lib/constants';
+import { TENDER_CATEGORIES, SUBCATEGORIES, PERSON_TYPES } from '@/lib/constants';
 import { TenderFormData } from '@/lib/types';
-import { insertTenderSchema } from '@shared/schema';
 
+// Схема валидации формы тендера
 const tenderFormSchema = z.object({
   title: z.string().min(5, { message: 'Название должно содержать минимум 5 символов' }).max(150, { message: 'Название не должно превышать 150 символов' }),
   description: z.string().min(20, { message: 'Описание должно содержать минимум 20 символов' }).max(2000, { message: 'Описание не должно превышать 2000 символов' }),
@@ -46,7 +47,11 @@ const tenderFormSchema = z.object({
   budget: z.number().optional(),
   location: z.string().min(2, { message: 'Укажите местоположение' }),
   deadline: z.date({ required_error: 'Выберите срок выполнения' }),
+  personType: z.enum(['individual', 'legal_entity'], { required_error: 'Выберите тип заказчика' }),
 });
+
+// Тип данных для формы, соответствующий схеме валидации
+type TenderFormValues = z.infer<typeof tenderFormSchema>;
 
 interface TenderFormProps {
   initialData?: TenderFormData;
@@ -55,12 +60,18 @@ interface TenderFormProps {
 
 export default function TenderForm({ initialData, isEditing = false }: TenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const form = useForm<z.infer<typeof tenderFormSchema>>({
+  // Инициализируем форму
+  const form = useForm<TenderFormValues>({
     resolver: zodResolver(tenderFormSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? {
+      ...initialData,
+      deadline: initialData.deadline ? new Date(initialData.deadline) : undefined,
+    } : {
       title: '',
       description: '',
       category: '',
@@ -68,16 +79,41 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
       budget: undefined,
       location: '',
       deadline: undefined,
+      personType: 'individual',
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof tenderFormSchema>) => {
+  // Отслеживаем изменение категории для отображения подкатегорий
+  const watchCategory = form.watch('category');
+  useEffect(() => {
+    setSelectedCategory(watchCategory);
+    // Если категория изменилась, сбрасываем подкатегорию
+    if (watchCategory !== selectedCategory) {
+      form.setValue('subcategory', '');
+    }
+  }, [watchCategory, form, selectedCategory]);
+
+  const onSubmit = async (data: TenderFormValues) => {
+    if (!user) {
+      toast({
+        title: 'Ошибка',
+        description: 'Вы должны быть авторизованы для создания тендера',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Format the data to match the API requirements
+      // Форматируем данные для API
       const tenderData: TenderFormData = {
         ...data,
         budget: data.budget || undefined,
+        deadline: data.deadline.toISOString(),
+        personType: data.personType,
+        userId: user.id, // Добавляем userId из контекста аутентификации
+        // Если есть ID в initialData, используем его для обновления
+        ...(isEditing && initialData?.id && { id: initialData.id }),
       };
 
       if (isEditing && initialData?.id) {
@@ -95,7 +131,8 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
       }
       
       navigate('/tenders');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error submitting tender:', error);
       toast({
         title: 'Ошибка',
         description: error.message || 'Произошла ошибка при сохранении тендера',
@@ -116,7 +153,7 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
             <FormItem>
               <FormLabel>Название тендера</FormLabel>
               <FormControl>
-                <Input placeholder="Например: Ремонт ванной комнаты под ключ" {...field} />
+                <Input placeholder="Например: Аренда экскаватора на 2 дня" {...field} />
               </FormControl>
               <FormDescription>
                 Укажите краткое и понятное название для вашего тендера
@@ -168,11 +205,46 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
                     ))}
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  Выберите категорию, соответствующую вашему тендеру
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {selectedCategory && (
+            <FormField
+              control={form.control}
+              name="subcategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Подкатегория</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите подкатегорию" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SUBCATEGORIES[selectedCategory as keyof typeof SUBCATEGORIES]?.map((subcategory) => (
+                        <SelectItem key={subcategory.value} value={subcategory.value}>
+                          {subcategory.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Уточните подкатегорию для более точного поиска
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="budget"
@@ -198,9 +270,7 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="location"
@@ -217,7 +287,9 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
               </FormItem>
             )}
           />
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="deadline"
@@ -252,6 +324,37 @@ export default function TenderForm({ initialData, isEditing = false }: TenderFor
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  Укажите дату, до которой нужно выполнить работы
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="personType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Тип заказчика</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите тип заказчика" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PERSON_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Укажите, от чьего имени публикуется тендер
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

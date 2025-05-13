@@ -1,13 +1,11 @@
 // Tender categories
 export const TENDER_CATEGORIES = [
-  { value: "repair", label: "Ремонт" },
-  { value: "construction", label: "Строительство" },
-  { value: "design", label: "Проектирование" },
-  { value: "finishing", label: "Отделка" },
-  { value: "installation", label: "Монтаж" },
-  { value: "demolition", label: "Демонтаж" },
-  { value: "landscaping", label: "Ландшафтный дизайн" },
-  { value: "other", label: "Другое" },
+  { value: "equipment", label: "Спецтехника" },
+  { value: "materials", label: "Материалы" },
+  { value: "tools", label: "Инструменты" },
+  { value: "services", label: "Услуги" },
+  { value: "property", label: "Недвижимость" },
+  { value: "transport", label: "Транспорт" },
 ];
 
 // Marketplace categories
@@ -18,14 +16,15 @@ export const MARKETPLACE_CATEGORIES = [
   { value: "services", label: "Услуги" },
 ];
 
-// Marketplace subcategories
-export const MARKETPLACE_SUBCATEGORIES = {
+// Subcategories for tenders and marketplace
+export const SUBCATEGORIES = {
   equipment: [
     { value: "excavators", label: "Экскаваторы" },
     { value: "loaders", label: "Погрузчики" },
     { value: "cranes", label: "Краны" },
     { value: "trucks", label: "Грузовики" },
     { value: "concrete_mixers", label: "Бетоносмесители" },
+    { value: "other", label: "Другое" }
   ],
   tools: [
     { value: "power_tools", label: "Электроинструменты" },
@@ -33,6 +32,7 @@ export const MARKETPLACE_SUBCATEGORIES = {
     { value: "measuring_tools", label: "Измерительные инструменты" },
     { value: "ladders", label: "Лестницы" },
     { value: "scaffolding", label: "Строительные леса" },
+    { value: "other", label: "Другое" }
   ],
   materials: [
     { value: "bricks", label: "Кирпич" },
@@ -40,6 +40,11 @@ export const MARKETPLACE_SUBCATEGORIES = {
     { value: "wood", label: "Древесина" },
     { value: "metal", label: "Металл" },
     { value: "paint", label: "Краска" },
+    { value: "sand", label: "Песок" },
+    { value: "panels", label: "Панели" },
+    { value: "windows", label: "Окна" },
+    { value: "doors", label: "Двери" },
+    { value: "other", label: "Другое" }
   ],
   services: [
     { value: "repair", label: "Ремонт" },
@@ -47,7 +52,25 @@ export const MARKETPLACE_SUBCATEGORIES = {
     { value: "design", label: "Проектирование" },
     { value: "demolition", label: "Демонтаж" },
     { value: "cleaning", label: "Уборка" },
+    { value: "consulting", label: "Консультации" },
+    { value: "installation", label: "Монтаж" },
+    { value: "plumbing", label: "Сантехника" },
+    { value: "electrical", label: "Электрика" },
+    { value: "other", label: "Другое" }
   ],
+  property: [
+    { value: "commercial", label: "Коммерческая недвижимость" },
+    { value: "residential", label: "Жилая недвижимость" },
+    { value: "land", label: "Земельный участок" },
+    { value: "industrial", label: "Промышленные объекты" },
+    { value: "other", label: "Другое" }
+  ],
+  transport: [
+    { value: "truck", label: "Грузовики" },
+    { value: "van", label: "Фургоны" },
+    { value: "special", label: "Спецтранспорт" },
+    { value: "other", label: "Другое" }
+  ]
 };
 
 // Listing types
@@ -98,3 +121,6 @@ export const PROFESSIONS = [
   { value: "engineer", label: "Инженер" },
   { value: "project_manager", label: "Руководитель проекта" },
 ];
+
+// Для обратной совместимости со старыми компонентами
+export const MARKETPLACE_SUBCATEGORIES = SUBCATEGORIES;
