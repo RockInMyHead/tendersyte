@@ -101,6 +101,14 @@ export const users = pgTable("users", {
   rating: integer("rating").default(0),
   isVerified: boolean("is_verified").default(false),
   completedProjects: integer("completed_projects").default(0),
+  
+  // Дополнительные поля для подрядчиков и юридических лиц
+  inn: text("inn"), // ИНН (для юридических лиц и подрядчиков)
+  website: text("website"), // Сайт (если есть)
+  
+  // Поле для хранения баланса кошелька
+  walletBalance: integer("wallet_balance").default(0),
+  
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -450,6 +458,42 @@ export type InsertTenderBid = z.infer<typeof insertTenderBidSchema>;
 
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
 export type InsertMarketplaceListing = z.infer<typeof insertMarketplaceListingSchema>;
+
+// Статусы банковской гарантии
+export const guaranteeStatusEnum = pgEnum('guarantee_status', [
+  'pending',     // Ожидание подтверждения
+  'active',      // Активная гарантия
+  'completed',   // Завершена успешно
+  'cancelled',   // Отменена
+  'disputed'     // В споре
+]);
+
+// Банковские гарантии
+export const bankGuarantees = pgTable("bank_guarantees", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => users.id), // Заказчик
+  contractorId: integer("contractor_id").notNull().references(() => users.id), // Исполнитель
+  tenderId: integer("tender_id").references(() => tenders.id), // Связанный тендер (если есть)
+  amount: integer("amount").notNull(), // Сумма гарантии
+  description: text("description").notNull(), // Описание гарантии
+  terms: text("terms").notNull(), // Условия гарантии
+  startDate: timestamp("start_date").notNull(), // Дата начала
+  endDate: timestamp("end_date").notNull(), // Дата окончания
+  status: guaranteeStatusEnum("status").notNull().default('pending'),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert схема для банковских гарантий
+export const insertBankGuaranteeSchema = createInsertSchema(bankGuarantees).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Тип для банковских гарантий
+export type BankGuarantee = typeof bankGuarantees.$inferSelect;
+export type InsertBankGuarantee = z.infer<typeof insertBankGuaranteeSchema>;
 
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;

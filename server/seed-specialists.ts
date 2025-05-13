@@ -160,7 +160,11 @@ export async function seedTopSpecialists() {
         bio: individual.bio,
         rating: individual.rating,
         completedProjects: individual.completedProjects,
-        isVerified: individual.isVerified
+        isVerified: individual.isVerified,
+        // Добавляем новые поля с пустыми значениями для физ. лиц
+        inn: null,
+        website: null,
+        walletBalance: 0
       };
       await db.insert(users).values(userData);
       console.log(`Добавлен специалист: ${individual.fullName}`);
@@ -181,7 +185,11 @@ export async function seedTopSpecialists() {
         bio: company.bio,
         rating: company.rating,
         completedProjects: company.completedProjects,
-        isVerified: company.isVerified
+        isVerified: company.isVerified,
+        // Добавляем новые поля для юр. лиц с данными
+        inn: company.userType === 'company' ? '7701234567' : null,
+        website: company.userType === 'company' ? `https://www.${company.username}.ru` : null,
+        walletBalance: 10000 // Добавим начальный баланс для примера
       };
       await db.insert(users).values(userData);
       console.log(`Добавлена компания: ${company.fullName}`);
