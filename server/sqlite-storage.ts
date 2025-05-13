@@ -72,21 +72,40 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createUser(user: InsertUser): Promise<User> {
-    // Явно добавляем временную метку для SQLite и конвертируем их в строки для совместимости
-    const now = new Date();
-    const createdAtStr = now.toISOString();
-    const updatedAtStr = now.toISOString();
-    
-    const userWithTimestamp = {
-      ...user,
-      createdAt: createdAtStr,
-      updatedAt: updatedAtStr
-    };
-    
+    // Create a new query to avoid direct SQL statements
     try {
-      // Используем массив для values, как требуется в Drizzle ORM
-      const [newUser] = await db.insert(users).values([userWithTimestamp]).returning();
-      return newUser;
+      // Store current date for timestamps
+      const now = new Date();
+      
+      // Execute SQL directly for better control over data types
+      const result = await db.run(`
+        INSERT INTO users (
+          username, password, email, phone, full_name, 
+          user_type, location, bio, avatar, inn, website, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+        ) RETURNING *;
+      `, [
+        user.username,
+        user.password,
+        user.email,
+        user.phone || null,
+        user.fullName,
+        user.userType || 'individual',
+        user.location || null,
+        user.bio || null,
+        user.avatar || null,
+        user.inn || null,
+        user.website || null,
+        now.toISOString(),
+        now.toISOString()
+      ]);
+      
+      if (result.length === 0) {
+        throw new Error("Failed to create user");
+      }
+      
+      return result[0];
     } catch (error) {
       console.error('Ошибка при создании пользователя:', error);
       throw error;
