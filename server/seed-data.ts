@@ -153,8 +153,8 @@ async function seedDatabase() {
         images: [],
         isActive: true,
         viewCount: 10,
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 день назад
-        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 день назад
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
         userId,
@@ -169,8 +169,8 @@ async function seedDatabase() {
         images: ['https://example.com/scaffold1.jpg'],
         isActive: true,
         viewCount: 22,
-        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 дня назад
-        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 дня назад
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
       }
     ];
     
@@ -182,7 +182,7 @@ async function seedDatabase() {
         amount: 2300000,
         description: 'Выполним проект жилого комплекса в кратчайшие сроки. Имеем опыт проектирования подобных комплексов.',
         isAccepted: false,
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 день назад
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 день назад
       },
       {
         tenderId: 1,
@@ -190,7 +190,7 @@ async function seedDatabase() {
         amount: 2450000,
         description: 'Наша компания специализируется на проектировании жилых комплексов. Гарантируем высокое качество и соблюдение всех норм.',
         isAccepted: false,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 дня назад
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 дня назад
       },
       {
         tenderId: 2,
@@ -198,7 +198,7 @@ async function seedDatabase() {
         amount: 480000,
         description: 'Бригада из 5 человек с опытом строительства фундаментов более 10 лет. Работаем быстро и качественно.',
         isAccepted: false,
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 день назад
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 день назад
       },
       {
         tenderId: 3,
@@ -206,7 +206,7 @@ async function seedDatabase() {
         amount: 1150000,
         description: 'Предлагаем поставку всех необходимых материалов по оптовым ценам с доставкой на объект.',
         isAccepted: false,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 дня назад
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 дня назад
       }
     ];
     
