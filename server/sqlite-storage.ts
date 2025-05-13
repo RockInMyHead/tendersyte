@@ -72,20 +72,20 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createUser(user: InsertUser): Promise<User> {
-    // Create a new query to avoid direct SQL statements
     try {
       // Store current date for timestamps
       const now = new Date();
+      const nowStr = now.toISOString();
       
-      // Execute SQL directly for better control over data types
-      const result = await db.run(`
+      // Используем prepared statement SQLite напрямую
+      const stmt = sqliteDb.prepare(`
         INSERT INTO users (
           username, password, email, phone, full_name, 
           user_type, location, bio, avatar, inn, website, created_at, updated_at
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-        ) RETURNING *;
-      `, [
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const result = stmt.run(
         user.username,
         user.password,
         user.email,
@@ -97,15 +97,26 @@ export class SQLiteStorage implements IStorage {
         user.avatar || null,
         user.inn || null,
         user.website || null,
-        now.toISOString(),
-        now.toISOString()
-      ]);
+        nowStr,
+        nowStr
+      );
       
-      if (result.length === 0) {
+      if (!result.lastInsertRowid) {
         throw new Error("Failed to create user");
       }
       
-      return result[0];
+      // Получаем созданного пользователя по ID
+      const getUserStmt = sqliteDb.prepare(`
+        SELECT * FROM users WHERE id = ?
+      `);
+      
+      const newUser = getUserStmt.get(Number(result.lastInsertRowid)) as User;
+      
+      if (!newUser) {
+        throw new Error("User created but could not be retrieved");
+      }
+      
+      return newUser;
     } catch (error) {
       console.error('Ошибка при создании пользователя:', error);
       throw error;
