@@ -60,11 +60,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(userData.password, salt);
       
-      // Create user with explicit timestamps for SQLite
+      // Create user with explicit timestamps for SQLite and initialize wallet
       const user = await storage.createUser({
         ...userData,
-        password: hashedPassword
+        password: hashedPassword,
+        walletBalance: 0 // Явно инициализируем кошелек с нулевым балансом
       });
+      
+      // Дополнительная проверка - если кошелек не был создан, обновляем пользователя
+      if (user && (user.walletBalance === null || user.walletBalance === undefined)) {
+        console.log(`Инициализация кошелька для пользователя ${user.id}, т.к. walletBalance=${user.walletBalance}`);
+        await storage.updateUser(user.id, { walletBalance: 0 });
+        
+        // Получаем обновленного пользователя для ответа
+        const updatedUser = await storage.getUser(user.id);
+        if (updatedUser) {
+          user.walletBalance = updatedUser.walletBalance;
+        }
+      }
       
       // Generate JWT
       const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
@@ -81,6 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Validation error", errors: error.errors });
       }
+      console.error("Ошибка при регистрации пользователя:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   });

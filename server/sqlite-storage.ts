@@ -81,8 +81,8 @@ export class SQLiteStorage implements IStorage {
       const stmt = sqliteDb.prepare(`
         INSERT INTO users (
           username, password, email, phone, full_name, 
-          user_type, location, bio, avatar, inn, website, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          user_type, location, bio, avatar, inn, website, wallet_balance, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       const result = stmt.run(
@@ -97,6 +97,9 @@ export class SQLiteStorage implements IStorage {
         user.avatar || null,
         user.inn || null,
         user.website || null,
+        // Инициализируем кошелек нулевым значением, если не указано
+        // @ts-ignore - walletBalance может быть не в типе
+        user.walletBalance !== undefined ? user.walletBalance : 0,
         nowStr,
         nowStr
       );
