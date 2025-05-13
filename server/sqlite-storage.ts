@@ -1118,6 +1118,97 @@ export class SQLiteStorage implements IStorage {
       requiredProfessions: parseJsonArray(tender.requiredProfessions as unknown as string)
     }));
   }
+
+  // Методы для работы с банковскими гарантиями
+
+  async getBankGuarantees(filters?: { 
+    customerId?: number; 
+    contractorId?: number; 
+    status?: string;
+  }): Promise<BankGuarantee[]> {
+    let query = db.select().from(bankGuarantees);
+    
+    if (filters) {
+      if (filters.customerId) {
+        query = query.where(eq(bankGuarantees.customerId, filters.customerId));
+      }
+      if (filters.contractorId) {
+        query = query.where(eq(bankGuarantees.contractorId, filters.contractorId));
+      }
+      if (filters.status) {
+        query = query.where(eq(bankGuarantees.status, filters.status));
+      }
+    }
+    
+    const guarantees = await query;
+    
+    // Преобразуем даты из строк в объекты Date для совместимости с API
+    return guarantees.map(guarantee => ({
+      ...guarantee,
+      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
+      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
+      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
+      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+    }));
+  }
+
+  async getBankGuarantee(id: number): Promise<BankGuarantee | undefined> {
+    const [guarantee] = await db.select().from(bankGuarantees).where(eq(bankGuarantees.id, id));
+    
+    if (!guarantee) return undefined;
+    
+    // Преобразуем даты из строк в объекты Date для совместимости с API
+    return {
+      ...guarantee,
+      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
+      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
+      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
+      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+    };
+  }
+
+  async createBankGuarantee(insertGuarantee: InsertBankGuarantee): Promise<BankGuarantee> {
+    // Преобразуем даты в ISO строки для SQLite
+    const guaranteeData = {
+      ...insertGuarantee,
+      startDate: insertGuarantee.startDate ? new Date(insertGuarantee.startDate).toISOString() : null,
+      endDate: insertGuarantee.endDate ? new Date(insertGuarantee.endDate).toISOString() : null,
+      // Используем SQL NULL для createdAt и updatedAt, чтобы СУБД использовала CURRENT_TIMESTAMP
+    };
+    
+    const [guarantee] = await db.insert(bankGuarantees).values([guaranteeData]).returning();
+    
+    // Преобразуем даты из строк в объекты Date для совместимости с API
+    return {
+      ...guarantee,
+      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
+      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
+      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
+      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+    };
+  }
+
+  async updateBankGuaranteeStatus(id: number, status: string): Promise<BankGuarantee | undefined> {
+    const [guarantee] = await db
+      .update(bankGuarantees)
+      .set({ 
+        status,
+        updatedAt: new Date().toISOString() // Устанавливаем текущую дату и время
+      })
+      .where(eq(bankGuarantees.id, id))
+      .returning();
+    
+    if (!guarantee) return undefined;
+    
+    // Преобразуем даты из строк в объекты Date для совместимости с API
+    return {
+      ...guarantee,
+      startDate: guarantee.startDate ? new Date(guarantee.startDate) : null,
+      endDate: guarantee.endDate ? new Date(guarantee.endDate) : null,
+      createdAt: guarantee.createdAt ? new Date(guarantee.createdAt) : null,
+      updatedAt: guarantee.updatedAt ? new Date(guarantee.updatedAt) : null
+    };
+  }
 }
 
 export const sqliteStorage = new SQLiteStorage();
