@@ -127,28 +127,31 @@ export class SQLiteStorage implements IStorage {
   }
   
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
-    // Обработка временных меток
+    // Создаем копию данных для обновления
     const updatedData = {...userData};
     
-    // Если есть поле updatedAt, преобразуем его в строку
-    if ('updatedAt' in updatedData) {
-      if (updatedData.updatedAt instanceof Date) {
-        updatedData.updatedAt = updatedData.updatedAt.toISOString();
-      } else if (updatedData.updatedAt === undefined) {
-        // Если дата не указана, устанавливаем текущую
-        updatedData.updatedAt = new Date().toISOString();
-      }
-    } else {
-      // Если updatedAt не указан, добавляем текущую дату
-      updatedData.updatedAt = new Date().toISOString();
-    }
+    // Удаляем проблемное поле updatedAt, так как оно будет установлено в SQL запросе
+    delete updatedData.updatedAt;
     
     try {
-      const [updatedUser] = await db
-        .update(users)
-        .set(updatedData)
-        .where(eq(users.id, id))
-        .returning();
+      // Используем SQL напрямую для обновления пользователя
+      const stmt = sqliteDb.prepare(`
+        UPDATE users
+        SET ${Object.keys(updatedData).map(key => {
+          // Преобразуем camelCase в snake_case для SQL
+          const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+          return `${snakeKey} = ?`;
+        }).join(', ')}, updated_at = ?
+        WHERE id = ?
+      `);
+      
+      // Получаем значения для SQL запроса
+      const values = [...Object.values(updatedData), new Date().toISOString(), id];
+      stmt.run(...values);
+      
+      // Получаем обновленного пользователя
+      const getUserStmt = sqliteDb.prepare(`SELECT * FROM users WHERE id = ?`);
+      const updatedUser = getUserStmt.get(id) as User;
       return updatedUser;
     } catch (error) {
       console.error('Ошибка при обновлении пользователя:', error);
