@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Card, 
   CardContent, 
@@ -30,7 +32,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ShieldCheck, ChevronLeft } from "lucide-react";
+import { ShieldCheck, ChevronLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/authContext";
 import { Link } from "wouter";
@@ -58,24 +60,40 @@ const guaranteeFormSchema = z.object({
 
 type GuaranteeFormValues = z.infer<typeof guaranteeFormSchema>;
 
+interface User {
+  id: number;
+  username: string;
+  fullName: string;
+}
+
+interface Tender {
+  id: number;
+  title: string;
+}
+
 export default function GuaranteeCreate() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  // Временные данные для списков
-  const users = [
-    { id: 1, name: "Иван Заказчиков" },
-    { id: 2, name: "Алексей Строителев" },
-    { id: 3, name: "ООО Стройматериалы" },
-    { id: 4, name: "ПАО Инвестстрой" },
-  ];
+  // Загрузка списка пользователей
+  const { 
+    data: users = [], 
+    isLoading: isLoadingUsers,
+    error: usersError 
+  } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+  });
 
-  const tenders = [
-    { id: 1, title: "Разработка проекта жилого комплекса" },
-    { id: 2, title: "Строительство фундамента для частного дома" },
-    { id: 3, title: "Закупка строительных материалов для ремонта офиса" },
-  ];
+  // Загрузка списка тендеров
+  const { 
+    data: tenders = [], 
+    isLoading: isLoadingTenders,
+    error: tendersError 
+  } = useQuery<Tender[]>({
+    queryKey: ['/api/tenders'],
+  });
 
   const form = useForm<GuaranteeFormValues>({
     resolver: zodResolver(guaranteeFormSchema),

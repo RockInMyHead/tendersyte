@@ -37,40 +37,14 @@ interface BankGuarantee {
 export default function Guarantees() {
   const { user, isAuthenticated } = useAuth();
   
-  // Пока нет API, используем временные данные
-  const mockGuarantees: BankGuarantee[] = [
-    {
-      id: 1,
-      customerId: 1,
-      contractorId: 2,
-      tenderId: 1,
-      amount: 500000,
-      description: "Гарантия выполнения обязательств по строительству фундамента",
-      terms: "Гарантия действует на протяжении всего срока строительства и 30 дней после сдачи объекта",
-      startDate: "2025-01-01T00:00:00Z",
-      endDate: "2025-07-01T00:00:00Z",
-      status: 'active',
-      createdAt: "2024-12-15T10:00:00Z",
-      updatedAt: "2024-12-15T10:00:00Z",
-      customerName: "Иван Заказчиков",
-      contractorName: "Алексей Строителев"
-    },
-    {
-      id: 2,
-      customerId: 3,
-      contractorId: 2,
-      amount: 250000,
-      description: "Гарантия на разработку проектной документации",
-      terms: "Гарантия возврата аванса при невыполнении обязательств",
-      startDate: "2025-02-15T00:00:00Z",
-      endDate: "2025-04-15T00:00:00Z",
-      status: 'pending',
-      createdAt: "2025-02-10T14:30:00Z",
-      updatedAt: "2025-02-10T14:30:00Z",
-      customerName: "ООО Стройматериалы",
-      contractorName: "Алексей Строителев"
-    }
-  ];
+  // Получаем список гарантий из API
+  const { 
+    data: guarantees = [], 
+    isLoading,
+    error 
+  } = useQuery<BankGuarantee[]>({
+    queryKey: ['/api/guarantees'],
+  });
 
   // Получение цвета статуса
   const getStatusColor = (status: string) => {
@@ -178,9 +152,19 @@ export default function Guarantees() {
         <div>
           <h2 className="text-2xl font-semibold mb-4">Ваши гарантии</h2>
           
-          {mockGuarantees.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+          ) : error ? (
+            <Card className="bg-red-50 border-red-100">
+              <CardContent className="pt-6 pb-6 text-center">
+                <p className="text-red-500 mb-4">Ошибка при загрузке гарантий. Попробуйте обновить страницу.</p>
+              </CardContent>
+            </Card>
+          ) : guarantees.length > 0 ? (
             <div className="grid gap-6">
-              {mockGuarantees.map((guarantee) => (
+              {guarantees.map((guarantee) => (
                 <Card key={guarantee.id} className="overflow-hidden">
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -202,8 +186,8 @@ export default function Guarantees() {
                           Стороны договора
                         </h4>
                         <div className="space-y-1 text-sm">
-                          <p><span className="text-gray-500">Заказчик:</span> {guarantee.customerName}</p>
-                          <p><span className="text-gray-500">Исполнитель:</span> {guarantee.contractorName}</p>
+                          <p><span className="text-gray-500">ID Заказчика:</span> {guarantee.customerId}</p>
+                          <p><span className="text-gray-500">ID Исполнителя:</span> {guarantee.contractorId}</p>
                         </div>
                       </div>
                       
