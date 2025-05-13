@@ -150,17 +150,15 @@ export async function seedTopSpecialists() {
   // Преобразуем данные перед вставкой, удалив поля, которые вызывают проблемы
   for (const individual of individuals) {
     try {
-      // Convert dates to ISO strings before insertion
-      const now = new Date();
-      const createdAtStr = now.toISOString();
-      const updatedAtStr = now.toISOString();
+      // Преобразуем тип пользователя из строки в правильное перечисление
+      const userTypeValue = individual.userType as "individual" | "contractor" | "company";
       
       const userData = {
         username: individual.username,
         password: individual.password,
         email: individual.email,
         fullName: individual.fullName,
-        userType: individual.userType,
+        userType: userTypeValue,
         location: individual.location,
         bio: individual.bio,
         rating: individual.rating,
@@ -170,8 +168,7 @@ export async function seedTopSpecialists() {
         inn: null,
         website: null,
         walletBalance: 0,
-        createdAt: createdAtStr, // Используем строковые переменные для дат
-        updatedAt: updatedAtStr  // Используем строковые переменные для дат
+        // Полностью удаляем поля с датами, чтобы SQLite использовал значения по умолчанию
       };
       await db.insert(users).values([userData]);
       console.log(`Добавлен специалист: ${individual.fullName}`);
@@ -182,28 +179,25 @@ export async function seedTopSpecialists() {
   
   for (const company of companies) {
     try {
-      // Convert dates to ISO strings before insertion
-      const now = new Date();
-      const createdAtStr = now.toISOString();
-      const updatedAtStr = now.toISOString();
+      // Преобразуем тип пользователя из строки в правильное перечисление
+      const userTypeValue = company.userType as "individual" | "contractor" | "company";
       
       const userData = {
         username: company.username,
         password: company.password,
         email: company.email,
         fullName: company.fullName,
-        userType: company.userType,
+        userType: userTypeValue,
         location: company.location,
         bio: company.bio,
         rating: company.rating,
         completedProjects: company.completedProjects,
         isVerified: company.isVerified,
         // Добавляем новые поля для юр. лиц с данными
-        inn: company.userType === 'company' ? '7701234567' : null,
-        website: company.userType === 'company' ? `https://www.${company.username}.ru` : null,
+        inn: userTypeValue === 'company' ? '7701234567' : null,
+        website: userTypeValue === 'company' ? `https://www.${company.username}.ru` : null,
         walletBalance: 10000, // Добавим начальный баланс для примера
-        createdAt: createdAtStr, // Используем строковые переменные для дат
-        updatedAt: updatedAtStr  // Используем строковые переменные для дат
+        // Полностью удаляем поля с датами, чтобы SQLite использовал значения по умолчанию
       };
       await db.insert(users).values([userData]);
       console.log(`Добавлена компания: ${company.fullName}`);

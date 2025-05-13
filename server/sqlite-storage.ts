@@ -4,7 +4,7 @@ import { IStorage } from './storage';
 import {
   users, tenders, tenderBids, marketplaceListings, messages, reviews,
   userDocuments, deliveryOptions, deliveryOrders, estimates, estimateItems, designProjects,
-  crews, crewMembers, crewPortfolios, crewMemberSkills,
+  crews, crewMembers, crewPortfolios, crewMemberSkills, bankGuarantees,
   type User, type InsertUser,
   type UserDocument, type InsertUserDocument,
   type Tender, type InsertTender,
@@ -20,7 +20,8 @@ import {
   type Crew, type InsertCrew,
   type CrewMember, type InsertCrewMember, 
   type CrewPortfolio, type InsertCrewPortfolio,
-  type CrewMemberSkill, type InsertCrewMemberSkill
+  type CrewMemberSkill, type InsertCrewMemberSkill,
+  type BankGuarantee, type InsertBankGuarantee
 } from '@shared/schema';
 
 // Преобразование строки JSON в массив строк

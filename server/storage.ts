@@ -1,6 +1,7 @@
 import {
   users, tenders, tenderBids, marketplaceListings, messages, reviews,
   userDocuments, deliveryOptions, deliveryOrders, estimates, estimateItems, designProjects,
+  bankGuarantees,
   type User, type InsertUser,
   type UserDocument, type InsertUserDocument,
   type Tender, type InsertTender,
@@ -12,7 +13,8 @@ import {
   type DeliveryOrder, type InsertDeliveryOrder,
   type Estimate, type InsertEstimate,
   type EstimateItem, type InsertEstimateItem,
-  type DesignProject, type InsertDesignProject
+  type DesignProject, type InsertDesignProject,
+  type BankGuarantee, type InsertBankGuarantee
 } from "@shared/schema";
 
 export interface IStorage {
@@ -118,6 +120,16 @@ export interface IStorage {
   updateDesignProjectStatus(id: number, status: string): Promise<DesignProject | undefined>;
   addProjectVisualization(id: number, visualizationUrl: string): Promise<DesignProject | undefined>;
   addProjectFile(id: number, fileUrl: string): Promise<DesignProject | undefined>;
+  
+  // Bank guarantee methods
+  getBankGuarantees(filters?: { 
+    customerId?: number; 
+    contractorId?: number; 
+    status?: string;
+  }): Promise<BankGuarantee[]>;
+  getBankGuarantee(id: number): Promise<BankGuarantee | undefined>;
+  createBankGuarantee(guarantee: InsertBankGuarantee): Promise<BankGuarantee>;
+  updateBankGuaranteeStatus(id: number, status: string): Promise<BankGuarantee | undefined>;
 }
 
 export class MemStorage implements IStorage {

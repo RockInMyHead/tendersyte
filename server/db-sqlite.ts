@@ -28,6 +28,50 @@ export function initializeDatabase() {
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
       .get();
     
+    // Добавляем миграцию для пользователей - добавление поля updated_at
+    try {
+      console.log('Checking if updated_at column exists in users table...');
+      sqlite.prepare('SELECT updated_at FROM users LIMIT 1').get();
+      console.log('Column updated_at already exists');
+    } catch (error) {
+      console.log('Adding updated_at column to users table...');
+      // SQLite не поддерживает DEFAULT CURRENT_TIMESTAMP при добавлении колонки
+      sqlite.exec('ALTER TABLE users ADD COLUMN updated_at TIMESTAMP');
+      
+      // Обновляем все существующие записи, устанавливая текущее время
+      sqlite.exec('UPDATE users SET updated_at = CURRENT_TIMESTAMP');
+      console.log('Column updated_at added successfully');
+    }
+    
+    // Проверяем наличие таблицы банковских гарантий
+    try {
+      console.log('Checking if bank_guarantees table exists...');
+      sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bank_guarantees'").get();
+      console.log('Table bank_guarantees already exists');
+    } catch (error) {
+      console.log('Creating bank_guarantees table...');
+      sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS bank_guarantees (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          description TEXT NOT NULL,
+          amount INTEGER NOT NULL,
+          status TEXT CHECK (status IN ('pending', 'approved', 'rejected', 'expired', 'canceled')) NOT NULL DEFAULT 'pending',
+          customer_id INTEGER NOT NULL,
+          contractor_id INTEGER NOT NULL,
+          tender_id INTEGER,
+          terms TEXT NOT NULL,
+          start_date TIMESTAMP NOT NULL,
+          end_date TIMESTAMP NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (customer_id) REFERENCES users(id),
+          FOREIGN KEY (contractor_id) REFERENCES users(id),
+          FOREIGN KEY (tender_id) REFERENCES tenders(id)
+        )
+      `);
+      console.log('Table bank_guarantees created successfully');
+    }
+    
     if (!tableExists) {
       console.log('Initializing database schema...');
       
@@ -47,7 +91,11 @@ export function initializeDatabase() {
           rating INTEGER DEFAULT 0,
           is_verified INTEGER DEFAULT 0,
           completed_projects INTEGER DEFAULT 0,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          inn TEXT,
+          website TEXT,
+          wallet_balance INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `, `
         CREATE TABLE IF NOT EXISTS tenders (
@@ -246,8 +294,8 @@ export function seedDatabaseIfEmpty() {
       
       // Добавляем тестовых пользователей
       const insertUser = sqlite.prepare(`
-        INSERT INTO users (username, password, email, phone, full_name, user_type, location, bio, avatar, is_verified)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (username, password, email, phone, full_name, user_type, location, bio, avatar, is_verified, wallet_balance, inn, website)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       // Пример тестовых данных
@@ -292,6 +340,10 @@ export function seedDatabaseIfEmpty() {
       
       // Добавляем пользователей
       users.forEach(user => {
+        const walletBalance = 10000; // Начальный баланс для тестовых пользователей
+        const inn = user.userType === 'company' ? '7701234567' : null;
+        const website = user.userType === 'company' ? `https://www.${user.username}.ru` : null;
+        
         insertUser.run(
           user.username,
           user.password,
@@ -302,7 +354,10 @@ export function seedDatabaseIfEmpty() {
           user.location,
           user.bio,
           user.avatar,
-          user.isVerified
+          user.isVerified,
+          walletBalance,
+          inn,
+          website
         );
       });
       

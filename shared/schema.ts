@@ -109,7 +109,9 @@ export const users = pgTable("users", {
   // Поле для хранения баланса кошелька
   walletBalance: integer("wallet_balance").default(0),
   
-  createdAt: timestamp("created_at").defaultNow(),
+  // Для SQLite мы не можем использовать defaultNow()
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
 });
 
 // Tenders table
