@@ -164,7 +164,8 @@ export async function seedTopSpecialists() {
         // Добавляем новые поля с пустыми значениями для физ. лиц
         inn: null,
         website: null,
-        walletBalance: 0
+        walletBalance: 0,
+        createdAt: new Date()
       };
       await db.insert(users).values(userData);
       console.log(`Добавлен специалист: ${individual.fullName}`);
