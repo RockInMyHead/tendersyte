@@ -284,7 +284,12 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createTenderBid(bid: InsertTenderBid): Promise<TenderBid> {
-    const [newBid] = await db.insert(tenderBids).values(bid).returning();
+    // Добавляем временную метку для SQLite
+    const bidWithTimestamp = {
+      ...bid,
+      createdAt: new Date()
+    };
+    const [newBid] = await db.insert(tenderBids).values(bidWithTimestamp).returning();
     return newBid;
   }
   
@@ -388,9 +393,12 @@ export class SQLiteStorage implements IStorage {
   
   async createMarketplaceListing(listing: InsertMarketplaceListing): Promise<MarketplaceListing> {
     // Преобразуем массив в строку JSON для сохранения
+    // и добавляем временные метки для SQLite
     const listingData = {
       ...listing,
-      images: JSON.stringify(listing.images || [])
+      images: JSON.stringify(listing.images || []),
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
@@ -471,7 +479,12 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createMessage(message: InsertMessage): Promise<Message> {
-    const [newMessage] = await db.insert(messages).values(message).returning();
+    // Добавляем временную метку для SQLite
+    const messageWithTimestamp = {
+      ...message,
+      createdAt: new Date()
+    };
+    const [newMessage] = await db.insert(messages).values(messageWithTimestamp).returning();
     return newMessage;
   }
   
@@ -491,7 +504,12 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createReview(review: InsertReview): Promise<Review> {
-    const [newReview] = await db.insert(reviews).values(review).returning();
+    // Добавляем временную метку для SQLite
+    const reviewWithTimestamp = {
+      ...review,
+      createdAt: new Date()
+    };
+    const [newReview] = await db.insert(reviews).values(reviewWithTimestamp).returning();
     return newReview;
   }
   
@@ -563,7 +581,13 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createDeliveryOrder(order: InsertDeliveryOrder): Promise<DeliveryOrder> {
-    const [newOrder] = await db.insert(deliveryOrders).values(order).returning();
+    // Добавляем временные метки для SQLite
+    const orderWithTimestamps = {
+      ...order,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newOrder] = await db.insert(deliveryOrders).values(orderWithTimestamps).returning();
     return newOrder;
   }
   
@@ -612,7 +636,13 @@ export class SQLiteStorage implements IStorage {
   }
   
   async createEstimate(estimate: InsertEstimate): Promise<Estimate> {
-    const [newEstimate] = await db.insert(estimates).values(estimate).returning();
+    // Добавляем временные метки для SQLite
+    const estimateWithTimestamps = {
+      ...estimate,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newEstimate] = await db.insert(estimates).values(estimateWithTimestamps).returning();
     return newEstimate;
   }
   
