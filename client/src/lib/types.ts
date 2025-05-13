@@ -10,6 +10,7 @@ export interface AuthUser {
   avatar?: string;
   rating: number;
   isVerified: boolean;
+  isAdmin?: boolean; // Права администратора
   completedProjects: number;
   inn?: string;  // ИНН для юр. лиц и подрядчиков
   website?: string; // Сайт компании или подрядчика

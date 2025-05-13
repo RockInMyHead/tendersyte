@@ -1,6 +1,7 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { sqliteStorage as storage } from "./sqlite-storage";
+import { sqliteDb } from "./db-sqlite";
 import { 
   insertUserSchema, 
   insertTenderSchema, 
@@ -8,7 +9,11 @@ import {
   insertMarketplaceListingSchema, 
   insertMessageSchema, 
   insertReviewSchema,
-  insertBankGuaranteeSchema
+  insertBankGuaranteeSchema,
+  users,
+  tenders,
+  marketplaceListings,
+  type User
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -761,6 +766,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(200).json(updatedGuarantee);
     } catch (error) {
+      res.status(500).json({ message: "Server error", error: (error as Error).message });
+    }
+  });
+
+  // Административные маршруты
+  apiRouter.get('/admin/stats', adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      // Подсчитываем количество пользователей
+      const userCountStmt = sqliteDb.prepare('SELECT COUNT(*) as count FROM users');
+      const userCount = userCountStmt.get() as { count: number };
+      
+      // Подсчитываем количество тендеров
+      const tenderCountStmt = sqliteDb.prepare('SELECT COUNT(*) as count FROM tenders');
+      const tenderCount = tenderCountStmt.get() as { count: number };
+      
+      // Подсчитываем количество объявлений на маркетплейсе
+      const listingCountStmt = sqliteDb.prepare('SELECT COUNT(*) as count FROM marketplace_listings');
+      const listingCount = listingCountStmt.get() as { count: number };
+      
+      // Подсчитываем количество активных пользователей (создавших тендеры или объявления)
+      const activeUsersStmt = sqliteDb.prepare(`
+        SELECT COUNT(DISTINCT user_id) as count 
+        FROM (
+          SELECT user_id FROM tenders
+          UNION
+          SELECT user_id FROM marketplace_listings
+        )
+      `);
+      const activeUsers = activeUsersStmt.get() as { count: number };
+      
+      res.status(200).json({
+        stats: {
+          users: userCount.count,
+          tenders: tenderCount.count,
+          listings: listingCount.count,
+          activeUsers: activeUsers.count
+        }
+      });
+    } catch (error) {
+      console.error("Error getting admin stats:", error);
+      res.status(500).json({ message: "Server error", error: (error as Error).message });
+    }
+  });
+  
+  // Получение списка всех пользователей (для админов)
+  apiRouter.get('/admin/users', adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      // Получаем всех пользователей
+      const allUsersStmt = sqliteDb.prepare('SELECT * FROM users');
+      const allUsers = allUsersStmt.all() as User[];
+      
+      // Удаляем пароли из ответа
+      const usersWithoutPasswords = allUsers.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.status(200).json(usersWithoutPasswords);
+    } catch (error) {
+      console.error("Error getting admin users list:", error);
+      res.status(500).json({ message: "Server error", error: (error as Error).message });
+    }
+  });
+  
+  // Администрирование пользователя (изменение прав, верификация и т.д.)
+  apiRouter.put('/admin/users/:id', adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Разрешаем обновлять только определенные поля через админку
+      const { isAdmin, isVerified, walletBalance } = req.body;
+      
+      // Создаем объект с данными для обновления
+      const updateData: Partial<User> = {};
+      
+      if (isAdmin !== undefined) {
+        updateData.isAdmin = isAdmin;
+      }
+      
+      if (isVerified !== undefined) {
+        updateData.isVerified = isVerified;
+      }
+      
+      if (walletBalance !== undefined) {
+        updateData.walletBalance = walletBalance;
+      }
+      
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+      
+      // Удаляем пароль из ответа
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user from admin panel:", error);
+      res.status(500).json({ message: "Server error", error: (error as Error).message });
+    }
+  });
+  
+  // Назначение пользователя администратором
+  apiRouter.post('/admin/make-admin', adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { isAdmin: true });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+      
+      // Удаляем пароль из ответа
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.status(200).json({
+        message: "User is now an admin",
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error("Error making user admin:", error);
       res.status(500).json({ message: "Server error", error: (error as Error).message });
     }
   });
