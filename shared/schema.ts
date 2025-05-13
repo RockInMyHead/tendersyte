@@ -487,7 +487,11 @@ export const bankGuarantees = pgTable("bank_guarantees", {
 });
 
 // Insert схема для банковских гарантий
-export const insertBankGuaranteeSchema = createInsertSchema(bankGuarantees).omit({
+export const insertBankGuaranteeSchema = createInsertSchema(bankGuarantees, {
+  // Преобразуем поля дат
+  startDate: z.string().transform((val) => new Date(val)),
+  endDate: z.string().transform((val) => new Date(val)),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true
