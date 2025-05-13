@@ -21,6 +21,7 @@ import Guarantees from "@/pages/Guarantees";
 import GuaranteeCreate from "@/pages/GuaranteeCreate";
 import GuaranteeDetail from "@/pages/GuaranteeDetail";
 import Wallet from "@/pages/Wallet";
+import Admin from "@/pages/Admin";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/authContext";
@@ -52,6 +53,7 @@ function Router() {
           <Route path="/guarantees/my" component={Guarantees} />
           <Route path="/how-it-works" component={HowItWorks} />
           <Route path="/help" component={Help} />
+          <Route path="/admin" component={Admin} />
           <Route component={NotFound} />
         </Switch>
       </main>

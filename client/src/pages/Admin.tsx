@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/authContext';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { 
   Card, 
   CardContent,
@@ -21,23 +21,25 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ReloadIcon, UserPlusIcon, DollarSignIcon, CheckIcon, XIcon } from 'lucide-react';
+import { Loader2, UserPlus, DollarSign, Check, X } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { UserType } from '@/lib/types';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
+// Типы пользователей
+type UserType = 'individual' | 'contractor' | 'company';
+
 export default function Admin() {
-  const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   // Проверка доступа - только для администраторов
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!user) {
       navigate('/login');
     } else if (user && !user.isAdmin) {
       navigate('/');
@@ -47,18 +49,39 @@ export default function Admin() {
         variant: "destructive",
       });
     }
-  }, [isAuthenticated, user, navigate, toast]);
+  }, [user, navigate, toast]);
+
+  // Типы данных для статистики и пользователей
+  interface AdminStats {
+    stats: {
+      users: number;
+      tenders: number;
+      listings: number;
+      activeUsers: number;
+    }
+  }
+
+  interface AdminUser {
+    id: number;
+    username: string;
+    email: string;
+    fullName: string;
+    userType: UserType;
+    walletBalance?: number;
+    isVerified: boolean;
+    isAdmin: boolean;
+  }
 
   // Получение статистики
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats, isLoading: isLoadingStats } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: !!user?.isAdmin,
   });
 
   // Получение списка пользователей
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
+  const { data: users, isLoading: isLoadingUsers } = useQuery<AdminUser[]>({
     queryKey: ['/api/admin/users'],
-    enabled: isAuthenticated && user?.isAdmin && activeTab === 'users',
+    enabled: !!user?.isAdmin && activeTab === 'users',
   });
 
   // Мутация для изменения прав администратора
@@ -105,7 +128,7 @@ export default function Admin() {
     }
   });
 
-  if (!isAuthenticated || !user?.isAdmin) {
+  if (!user?.isAdmin) {
     return null;
   }
 
@@ -207,7 +230,7 @@ export default function Admin() {
             <CardContent>
               {isLoadingUsers ? (
                 <div className="flex items-center justify-center p-8">
-                  <ReloadIcon className="mr-2 h-8 w-8 animate-spin" />
+                  <Loader2 className="mr-2 h-8 w-8 animate-spin" />
                   <span>Загрузка списка пользователей...</span>
                 </div>
               ) : (
