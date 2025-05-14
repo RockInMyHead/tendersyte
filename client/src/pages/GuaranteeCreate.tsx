@@ -150,7 +150,7 @@ export default function GuaranteeCreate() {
       const data = {
         customerId: parseInt(values.customerId, 10),
         contractorId: parseInt(values.contractorId, 10),
-        tenderId: values.tenderId ? parseInt(values.tenderId, 10) : undefined,
+        tenderId: values.tenderId && values.tenderId !== 'none' ? parseInt(values.tenderId, 10) : undefined,
         amount: values.amount,
         description: values.description,
         terms: values.terms,
@@ -293,7 +293,7 @@ export default function GuaranteeCreate() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Нет связанного тендера</SelectItem>
+                            <SelectItem value="none">Нет связанного тендера</SelectItem>
                             {isLoadingTenders ? (
                               <div className="p-2 flex items-center justify-center">
                                 <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
