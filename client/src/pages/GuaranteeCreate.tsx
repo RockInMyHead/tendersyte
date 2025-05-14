@@ -64,6 +64,7 @@ interface User {
   id: number;
   username: string;
   fullName: string;
+  userType: 'individual' | 'contractor' | 'company';
 }
 
 interface Tender {
@@ -76,6 +77,7 @@ export default function GuaranteeCreate() {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [selectedTender, setSelectedTender] = useState<Tender | null>(null);
 
   // Загрузка списка пользователей
   const { 
@@ -95,6 +97,22 @@ export default function GuaranteeCreate() {
     queryKey: ['/api/tenders'],
   });
 
+  // Находим заказчика и исполнителя для выбранного тендера
+  const getCustomerAndContractorForTender = (tenderId: string | 'none') => {
+    if (tenderId === 'none' || !tenderId) return null;
+
+    const tender = tenders.find(t => t.id.toString() === tenderId);
+    if (!tender) return null;
+
+    // Поскольку у нас нет полных данных о тендере, мы просто возвращаем первого
+    // заказчика и первого исполнителя из списков (это временное решение)
+    // В реальной системе нужно получать эти данные из самого тендера
+    const customer = users.find(u => u.userType === 'individual' || u.userType === 'company');
+    const contractor = users.find(u => u.userType === 'contractor' || u.userType === 'company');
+    
+    return { customerId: customer?.id.toString(), contractorId: contractor?.id.toString() };
+  };
+
   const form = useForm<GuaranteeFormValues>({
     resolver: zodResolver(guaranteeFormSchema),
     defaultValues: {
@@ -108,6 +126,29 @@ export default function GuaranteeCreate() {
       endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +90 дней
     },
   });
+
+  // Обработка изменения выбранного тендера
+  const handleTenderChange = (tenderId: string) => {
+    if (tenderId === 'none') {
+      form.setValue('customerId', '');
+      form.setValue('contractorId', '');
+      setSelectedTender(null);
+      return;
+    }
+
+    const tender = tenders.find(t => t.id.toString() === tenderId);
+    if (tender) {
+      setSelectedTender(tender);
+      
+      // В идеале, эти данные должны приходить с сервера
+      // Сейчас это заглушка, в реальной системе нужно запрашивать данные тендера
+      const parties = getCustomerAndContractorForTender(tenderId);
+      if (parties) {
+        if (parties.customerId) form.setValue('customerId', parties.customerId);
+        if (parties.contractorId) form.setValue('contractorId', parties.contractorId);
+      }
+    }
+  };
 
   // Мутация для создания гарантии
   const createGuaranteeMutation = useMutation({
@@ -190,6 +231,52 @@ export default function GuaranteeCreate() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="tenderId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Связанный тендер</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            handleTenderChange(value);
+                          }} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger disabled={isLoadingTenders}>
+                              {isLoadingTenders && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                              <SelectValue placeholder="Выберите тендер" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Нет связанного тендера</SelectItem>
+                            {isLoadingTenders ? (
+                              <div className="p-2 flex items-center justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
+                              </div>
+                            ) : tendersError ? (
+                              <div className="p-2 text-red-500">Ошибка загрузки тендеров</div>
+                            ) : tenders.length === 0 ? (
+                              <div className="p-2 text-gray-500">Нет доступных тендеров</div>
+                            ) : (
+                              tenders.map(tender => (
+                                <SelectItem key={tender.id} value={tender.id.toString()}>
+                                  {tender.title}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Тендер, к которому относится данная гарантия. При выборе тендера, заказчик и исполнитель будут заполнены автоматически.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -200,9 +287,10 @@ export default function GuaranteeCreate() {
                           <Select 
                             onValueChange={field.onChange} 
                             defaultValue={field.value}
+                            disabled={selectedTender !== null}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={isLoadingUsers}>
+                              <SelectTrigger disabled={isLoadingUsers || selectedTender !== null}>
                                 {isLoadingUsers && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                                 <SelectValue placeholder="Выберите заказчика" />
                               </SelectTrigger>
@@ -226,7 +314,9 @@ export default function GuaranteeCreate() {
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            Заказчик, для которого оформляется гарантия
+                            {selectedTender 
+                              ? "Заказчик автоматически выбран на основе тендера" 
+                              : "Заказчик, для которого оформляется гарантия"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -242,9 +332,10 @@ export default function GuaranteeCreate() {
                           <Select 
                             onValueChange={field.onChange} 
                             defaultValue={field.value}
+                            disabled={selectedTender !== null}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={isLoadingUsers}>
+                              <SelectTrigger disabled={isLoadingUsers || selectedTender !== null}>
                                 {isLoadingUsers && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                                 <SelectValue placeholder="Выберите исполнителя" />
                               </SelectTrigger>
@@ -268,56 +359,15 @@ export default function GuaranteeCreate() {
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            Исполнитель, выполняющий работы
+                            {selectedTender 
+                              ? "Исполнитель автоматически выбран на основе тендера" 
+                              : "Исполнитель, выполняющий работы. Должен быть связан с заказчиком по договору."}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="tenderId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Связанный тендер (необязательно)</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger disabled={isLoadingTenders}>
-                              {isLoadingTenders && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-                              <SelectValue placeholder="Выберите тендер (если есть)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">Нет связанного тендера</SelectItem>
-                            {isLoadingTenders ? (
-                              <div className="p-2 flex items-center justify-center">
-                                <Loader2 className="h-4 w-4 animate-spin mr-1" /> Загрузка...
-                              </div>
-                            ) : tendersError ? (
-                              <div className="p-2 text-red-500">Ошибка загрузки тендеров</div>
-                            ) : tenders.length === 0 ? (
-                              <div className="p-2 text-gray-500">Нет доступных тендеров</div>
-                            ) : (
-                              tenders.map(tender => (
-                                <SelectItem key={tender.id} value={tender.id.toString()}>
-                                  {tender.title}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Тендер, к которому относится данная гарантия
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   
                   <FormField
                     control={form.control}
