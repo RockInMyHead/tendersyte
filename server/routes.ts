@@ -1,7 +1,7 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { sqliteStorage as storage } from "./sqlite-storage";
-import { sqliteDb } from "./db-sqlite";
+import { sqliteDb, db } from "./db-sqlite";
 import { 
   insertUserSchema, 
   insertTenderSchema, 
@@ -167,6 +167,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // User routes
+  // Получение списка всех пользователей
+  apiRouter.get('/users', async (_req: Request, res: Response) => {
+    try {
+      // Запрашиваем всех пользователей из базы данных
+      const allUsers = await db.select({
+        id: users.id,
+        username: users.username,
+        fullName: users.fullName,
+        userType: users.userType
+      }).from(users);
+      
+      res.status(200).json(allUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Server error", error: (error as Error).message });
+    }
+  });
+
   apiRouter.get('/users/top', async (req: Request, res: Response) => {
     try {
       const userType = req.query.personType as string;
