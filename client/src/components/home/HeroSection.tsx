@@ -111,46 +111,59 @@ const HeroSection = () => {
               </div>
             ) : (
               <div className="w-full max-w-lg relative">
-                <Card className="bg-white text-gray-900 shadow-xl overflow-hidden">
-                  {currentTender.images && currentTender.images.length > 0 ? (
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={currentTender.images[0]} 
-                        alt={currentTender.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                        <Badge className="bg-amber-500 hover:bg-amber-600">
-                          {currentTender.category} / {currentTender.subcategory}
-                        </Badge>
+                <Card className="bg-white text-gray-900 shadow-xl overflow-hidden h-[420px] flex flex-col">
+                  {/* Фиксированная высота для изображения */}
+                  <div className="relative h-48 overflow-hidden flex-shrink-0">
+                    {currentTender.images && currentTender.images.length > 0 ? (
+                      <>
+                        <img 
+                          src={currentTender.images[0]} 
+                          alt={currentTender.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                          <Badge className="bg-amber-500 hover:bg-amber-600">
+                            {currentTender.category} / {currentTender.subcategory}
+                          </Badge>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <p className="text-gray-500">Нет изображения</p>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="h-48 bg-gray-200 flex items-center justify-center">
-                      <p className="text-gray-500">Нет изображения</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-bold mb-2 line-clamp-2">{currentTender.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{currentTender.description}</p>
+                  {/* Фиксированная высота для контента */}
+                  <CardContent className="p-4 flex-grow flex flex-col">
+                    {/* Заголовок с фиксированной высотой */}
+                    <div className="mb-2 h-14 overflow-hidden">
+                      <h3 className="text-lg font-bold line-clamp-2">{currentTender.title}</h3>
+                    </div>
                     
-                    <div className="flex flex-col space-y-2 text-sm">
+                    {/* Описание с фиксированной высотой */}
+                    <div className="mb-4 h-10 overflow-hidden">
+                      <p className="text-sm text-gray-600 line-clamp-2">{currentTender.description}</p>
+                    </div>
+                    
+                    {/* Блок с информацией - фиксированный */}
+                    <div className="flex flex-col space-y-2 text-sm mb-4">
                       <div className="flex items-center text-gray-600">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span>{currentTender.location}</span>
+                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{currentTender.location}</span>
                       </div>
                       <div className="flex items-center text-gray-600">
-                        <DollarSign className="h-4 w-4 mr-2" />
+                        <DollarSign className="h-4 w-4 mr-2 flex-shrink-0" />
                         <span>{formatPrice(currentTender.budget)}</span>
                       </div>
                       <div className="flex items-center text-gray-600">
-                        <Calendar className="h-4 w-4 mr-2" />
+                        <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
                         <span>{formatDate(currentTender.createdAt, 'dd.MM.yyyy')}</span>
                       </div>
                     </div>
                     
-                    <div className="mt-4 flex justify-between items-center">
+                    {/* Футер с кнопками - всегда в нижней части карточки */}
+                    <div className="mt-auto flex justify-between items-center">
                       <Badge variant="outline" className={
                         currentTender.status === 'open' ? 'text-green-600 border-green-600' : 
                         currentTender.status === 'in_progress' ? 'text-blue-600 border-blue-600' : 
