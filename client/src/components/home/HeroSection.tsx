@@ -1,9 +1,71 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/authContext";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Calendar, MapPin, DollarSign, Loader2 } from "lucide-react";
+import { formatPrice, formatDate } from "@/lib/utils";
+
+// Интерфейс для тендеров
+interface Tender {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  subcategory: string;
+  budget: number;
+  location: string;
+  status: string;
+  createdAt: string;
+  images?: string[];
+}
 
 const HeroSection = () => {
   const { isAuthenticated } = useAuth();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Получаем данные о тендерах
+  const { 
+    data: tenders = [], 
+    isLoading, 
+    error 
+  } = useQuery<Tender[]>({
+    queryKey: ['/api/tenders'],
+  });
+
+  // Сортируем тендеры по дате создания (новые сначала)
+  const sortedTenders = [...tenders].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  // Переключаем тендеры каждые 5 секунд
+  useEffect(() => {
+    if (sortedTenders.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === sortedTenders.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [sortedTenders.length]);
+
+  // Текущий отображаемый тендер
+  const currentTender = sortedTenders[currentIndex];
+
+  // Получаем статус тендера для отображения
+  const getStatusText = (status: string) => {
+    switch(status) {
+      case 'open': return 'Открыт';
+      case 'in_progress': return 'В работе';
+      case 'completed': return 'Завершен';
+      case 'canceled': return 'Отменен';
+      default: return 'Неизвестно';
+    }
+  };
 
   return (
     <section className="bg-primary bg-gradient-to-br from-primary to-primary-dark text-white py-12 md:py-20">
@@ -36,12 +98,102 @@ const HeroSection = () => {
               </Link>
             </div>
           </div>
+          
           <div className="md:w-1/2 flex justify-center">
-            <img 
-              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" 
-              alt="Строительная площадка с техникой и рабочими" 
-              className="rounded-lg shadow-lg max-w-full h-auto"
-            />
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-64 w-full bg-gray-800 bg-opacity-30 rounded-lg">
+                <Loader2 className="h-12 w-12 animate-spin mb-4 text-white" />
+                <p className="text-white text-opacity-80">Загрузка последних тендеров...</p>
+              </div>
+            ) : error || sortedTenders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 w-full bg-gray-800 bg-opacity-30 rounded-lg">
+                <p className="text-white text-opacity-80">Нет доступных тендеров</p>
+              </div>
+            ) : (
+              <div className="w-full max-w-lg relative">
+                <Card className="bg-white text-gray-900 shadow-xl overflow-hidden">
+                  {currentTender.images && currentTender.images.length > 0 ? (
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={currentTender.images[0]} 
+                        alt={currentTender.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                        <Badge className="bg-amber-500 hover:bg-amber-600">
+                          {currentTender.category} / {currentTender.subcategory}
+                        </Badge>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-48 bg-gray-200 flex items-center justify-center">
+                      <p className="text-gray-500">Нет изображения</p>
+                    </div>
+                  )}
+                  
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-bold mb-2 line-clamp-2">{currentTender.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{currentTender.description}</p>
+                    
+                    <div className="flex flex-col space-y-2 text-sm">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span>{currentTender.location}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        <span>{formatPrice(currentTender.budget)}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>{formatDate(currentTender.createdAt, 'dd.MM.yyyy')}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 flex justify-between items-center">
+                      <Badge variant="outline" className={
+                        currentTender.status === 'open' ? 'text-green-600 border-green-600' : 
+                        currentTender.status === 'in_progress' ? 'text-blue-600 border-blue-600' : 
+                        'text-gray-600 border-gray-600'
+                      }>
+                        {getStatusText(currentTender.status)}
+                      </Badge>
+                      
+                      <Link href={`/tenders/${currentTender.id}`}>
+                        <Button variant="ghost" size="sm" className="text-primary flex items-center">
+                          Подробнее <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Индикатор прогресса */}
+                {sortedTenders.length > 1 && (
+                  <div className="mt-2 flex justify-center space-x-2">
+                    {sortedTenders.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-40'
+                        }`}
+                        onClick={() => setCurrentIndex(index)}
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Прогресс-бар */}
+                {sortedTenders.length > 1 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 bg-opacity-20">
+                    <div 
+                      className="h-full bg-white transition-all duration-300" 
+                      style={{ width: `${((currentIndex + 1) / sortedTenders.length) * 100}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
