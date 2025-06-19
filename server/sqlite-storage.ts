@@ -295,8 +295,8 @@ export class SQLiteStorage implements IStorage {
     const tenderData = {
       ...tender,
       images: JSON.stringify(tender.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newTender] = await db.insert(tenders).values(tenderData).returning();
@@ -357,7 +357,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const bidWithTimestamp = {
       ...bid,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newBid] = await db.insert(tenderBids).values(bidWithTimestamp).returning();
     return newBid;
@@ -467,8 +467,8 @@ export class SQLiteStorage implements IStorage {
     const listingData = {
       ...listing,
       images: JSON.stringify(listing.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
@@ -563,7 +563,7 @@ export class SQLiteStorage implements IStorage {
      *    timestamp.
      */
     if (!('createdAt' in payload)) {
-      payload.createdAt = new Date().toISOString();
+      payload.createdAt = new Date();
     }
 
     const [row] = await db.insert(messages).values(payload).returning();
@@ -600,7 +600,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const reviewWithTimestamp = {
       ...review,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newReview] = await db.insert(reviews).values(reviewWithTimestamp).returning();
     return newReview;
