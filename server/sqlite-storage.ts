@@ -549,8 +549,6 @@ export class SQLiteStorage implements IStorage {
   }
   
 
-  // sqlite-storage.ts  (финальная версия)
-// sqlite-storage.ts
   async createMessage(msg: InsertMessage): Promise<Message> {
     /** 1. attachments → строка, если вдруг пришёл объект */
     const payload: Record<string, any> = { ...msg };
@@ -558,7 +556,16 @@ export class SQLiteStorage implements IStorage {
       payload.attachments = JSON.stringify(payload.attachments);
     }
 
-    /** 2. никаких createdAt — БД сама выставит дефолт */
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date().toISOString();
+    }
+
     const [row] = await db.insert(messages).values(payload).returning();
 
     /** 3. Drizzle вернёт createdAt строкой; но если драйвер
