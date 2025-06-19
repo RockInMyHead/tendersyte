@@ -23,7 +23,7 @@ import {
   type CrewMemberSkill, type InsertCrewMemberSkill,
   type BankGuarantee, type InsertBankGuarantee
 } from '@shared/schema';
-
+import { InsertMessage, Message } from '@shared/schema';
 // Преобразование строки JSON в массив строк
 function parseJsonArray(json: string | null): string[] {
   if (!json) return [];
@@ -548,16 +548,32 @@ export class SQLiteStorage implements IStorage {
       .orderBy(messages.createdAt);
   }
   
-  async createMessage(message: InsertMessage): Promise<Message> {
-    // Добавляем временную метку для SQLite
-    const messageWithTimestamp = {
-      ...message,
-      createdAt: new Date()
-    };
-    const [newMessage] = await db.insert(messages).values(messageWithTimestamp).returning();
-    return newMessage;
+
+  // sqlite-storage.ts  (финальная версия)
+// sqlite-storage.ts
+  async createMessage(msg: InsertMessage): Promise<Message> {
+    /** 1. attachments → строка, если вдруг пришёл объект */
+    const payload: Record<string, any> = { ...msg };
+    if ('attachments' in payload && typeof payload.attachments !== 'string') {
+      payload.attachments = JSON.stringify(payload.attachments);
+    }
+
+    /** 2. никаких createdAt — БД сама выставит дефолт */
+    const [row] = await db.insert(messages).values(payload).returning();
+
+    /** 3. Drizzle вернёт createdAt строкой; но если драйвер
+        вдруг вернул Date, превратим в ISO */
+    const createdAt =
+      row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt;
+
+    return { ...row, createdAt } as Message;
   }
-  
+
+
+
+
+
+
   async markMessageAsRead(id: number): Promise<Message | undefined> {
     const [updatedMessage] = await db
       .update(messages)
@@ -1343,3 +1359,8 @@ export class SQLiteStorage implements IStorage {
 }
 
 export const sqliteStorage = new SQLiteStorage();
+
+
+
+
+

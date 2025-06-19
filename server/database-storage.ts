@@ -320,12 +320,71 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    // Готовим чистый объект для БД
+    const safeMessage: any = {};
+  
+    // Список допустимых полей — корректируй по своей схеме!
+    const allowedFields = [
+      'senderId',
+      'receiverId',
+      'text',
+      'attachments',
+      'isRead',
+      'createdAt'
+    ];
+  
+    for (const key of allowedFields) {
+      let val = (insertMessage as any)[key];
+      if (typeof val === 'undefined') continue;
+  
+      if (key === 'attachments') {
+        // Сериализуем attachments, если надо
+        if (val && typeof val !== 'string') {
+          val = JSON.stringify(val);
+        }
+        if (val === undefined) val = null;
+        safeMessage.attachments = val;
+        continue;
+      }
+  
+      if (key === 'createdAt') {
+        // Гарантируем строку ISO
+        if (val instanceof Date) val = val.toISOString();
+        if (typeof val === 'string' && !val.match(/^\d{4}-\d{2}-\d{2}/)) {
+          val = new Date(val).toISOString();
+        }
+        if (!val) val = new Date().toISOString();
+        safeMessage.createdAt = val;
+        continue;
+      }
+  
+      // Пропускаем объекты (вдруг вместо senderId случайно пришёл sender: {...})
+      if (typeof val === 'object' && val !== null) {
+        if (val.id && typeof val.id === 'number') {
+          safeMessage[key] = val.id;
+        }
+        continue;
+      }
+  
+      safeMessage[key] = val;
+    }
+  
+    // Обязательные поля
+    if (!safeMessage.createdAt) safeMessage.createdAt = new Date().toISOString();
+    if (typeof safeMessage.isRead !== 'boolean') safeMessage.isRead = false;
+  
+    // Логируем payload для отладки
+    console.log('insertMessage payload:', safeMessage);
+  
+    // Вставка в БД
     const [message] = await db
       .insert(messages)
-      .values(insertMessage)
+      .values(safeMessage)
       .returning();
     return message;
   }
+  
+  
 
   async markMessageAsRead(id: number): Promise<Message | undefined> {
     const [updatedMessage] = await db

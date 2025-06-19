@@ -40,7 +40,6 @@ function Router() {
           <Route path="/marketplace/create" component={MarketplaceItemCreate} />
           <Route path="/marketplace/:id" component={MarketplaceItemDetail} />
           <Route path="/profile" component={Profile} />
-          <Route path="/wallet" component={Wallet} />
           <Route path="/profile/:id" component={Profile} />
           <Route path="/messages" component={Messages} />
           <Route path="/messages/new" component={NewMessage} />
