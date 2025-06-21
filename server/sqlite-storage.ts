@@ -23,7 +23,6 @@ import {
   type CrewMemberSkill, type InsertCrewMemberSkill,
   type BankGuarantee, type InsertBankGuarantee
 } from '@shared/schema';
-import { InsertMessage, Message } from '@shared/schema';
 // Преобразование строки JSON в массив строк
 function parseJsonArray(json: string | null): string[] {
   if (!json) return [];
@@ -550,11 +549,14 @@ export class SQLiteStorage implements IStorage {
   
 
   async createMessage(msg: InsertMessage): Promise<Message> {
-    /**
-     * В актуальной схеме таблицы сообщений нет поля `attachments`, поэтому
-     * просто копируем переданные данные без него. Если в будущем появится
-     * поддержка вложений, обработку можно вернуть.
-     */
+
+    const now = new Date().toISOString();
+
+    const insert = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const result = insert.run(msg.senderId, msg.receiverId, msg.content, now);
     const payload: Record<string, any> = {
       senderId: msg.senderId,
       receiverId: msg.receiverId,
@@ -583,13 +585,17 @@ export class SQLiteStorage implements IStorage {
     }
 
     const [row] = await db.insert(messages).values(payload).returning();
+    const select = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const row = select.get(Number(result.lastInsertRowid)) as any;
 
-    /** 3. Drizzle вернёт createdAt строкой; но если драйвер
-        вдруг вернул Date, превратим в ISO */
-    const createdAt =
-      row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt;
-
-    return { ...row, createdAt } as Message;
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: row.created_at,
+    } as Message;
   }
 
 
