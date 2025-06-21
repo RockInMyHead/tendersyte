@@ -568,7 +568,7 @@ export class SQLiteStorage implements IStorage {
      *    timestamp.
      */
     if (!('createdAt' in payload)) {
-      payload.createdAt = new Date();
+      payload.createdAt = new Date().toISOString();
     }
 
 
