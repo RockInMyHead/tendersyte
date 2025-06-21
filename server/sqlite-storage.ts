@@ -549,11 +549,7 @@ export class SQLiteStorage implements IStorage {
   
 
   async createMessage(msg: InsertMessage): Promise<Message> {
-    /**
-     * Сохраняем только разрешённые поля. В актуальной схеме нет
-     * поддержки вложений, поэтому отправляем только текст, идентификаторы
-     * отправителя и получателя и явную метку времени.
-     */
+
     const now = new Date().toISOString();
 
     const insert = sqliteDb.prepare(
@@ -561,7 +557,34 @@ export class SQLiteStorage implements IStorage {
        VALUES (?, ?, ?, ?)`
     );
     const result = insert.run(msg.senderId, msg.receiverId, msg.content, now);
+    const payload: Record<string, any> = {
+      senderId: msg.senderId,
+      receiverId: msg.receiverId,
+      content: msg.content
+    };
 
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date();
+    }
+
+
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date().toISOString();
+    }
+
+    const [row] = await db.insert(messages).values(payload).returning();
     const select = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
     const row = select.get(Number(result.lastInsertRowid)) as any;
 
