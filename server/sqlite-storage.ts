@@ -294,8 +294,8 @@ export class SQLiteStorage implements IStorage {
     const tenderData = {
       ...tender,
       images: JSON.stringify(tender.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newTender] = await db.insert(tenders).values(tenderData).returning();
@@ -356,7 +356,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const bidWithTimestamp = {
       ...bid,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newBid] = await db.insert(tenderBids).values(bidWithTimestamp).returning();
     return newBid;
@@ -466,8 +466,8 @@ export class SQLiteStorage implements IStorage {
     const listingData = {
       ...listing,
       images: JSON.stringify(listing.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
@@ -549,12 +549,14 @@ export class SQLiteStorage implements IStorage {
   
 
   async createMessage(msg: InsertMessage): Promise<Message> {
+
     /**
      * Для SQLite не работает функция `now()` в дефолтных значениях,
      * поэтому временную метку добавляем вручную. Используем ISO‑строку,
      * так библиотека корректно сохранит её как TEXT.
      */
     const timestamp = new Date().toISOString();
+
 
     const insertStmt = sqliteDb.prepare(
       `INSERT INTO messages (sender_id, receiver_id, content, created_at)
@@ -579,6 +581,77 @@ export class SQLiteStorage implements IStorage {
       content: row.content,
       isRead: !!row.is_read,
       createdAt: new Date(row.created_at),
+
+
+    const insertStmt = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const result = insertStmt.run(
+      msg.senderId,
+      msg.receiverId,
+      msg.content,
+      timestamp
+    );
+
+    const selectStmt = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const messageRow = selectStmt.get(Number(result.lastInsertRowid)) as any;
+
+    return {
+      id: messageRow.id,
+      senderId: messageRow.sender_id,
+      receiverId: messageRow.receiver_id,
+      content: messageRow.content,
+      isRead: !!messageRow.is_read,
+      createdAt: messageRow.created_at,
+
+
+    const now = new Date().toISOString();
+
+    const insert = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const result = insert.run(msg.senderId, msg.receiverId, msg.content, now);
+    const payload: Record<string, any> = {
+      senderId: msg.senderId,
+      receiverId: msg.receiverId,
+      content: msg.content
+    };
+
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date();
+    }
+
+
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date().toISOString();
+    }
+
+    const [row] = await db.insert(messages).values(payload).returning();
+    const select = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const row = select.get(Number(result.lastInsertRowid)) as any;
+
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: row.created_at,
+
     } as Message;
   }
 
@@ -606,7 +679,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const reviewWithTimestamp = {
       ...review,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newReview] = await db.insert(reviews).values(reviewWithTimestamp).returning();
     return newReview;
