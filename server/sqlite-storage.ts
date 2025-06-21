@@ -23,7 +23,6 @@ import {
   type CrewMemberSkill, type InsertCrewMemberSkill,
   type BankGuarantee, type InsertBankGuarantee
 } from '@shared/schema';
-import { InsertMessage, Message } from '@shared/schema';
 // Преобразование строки JSON в массив строк
 function parseJsonArray(json: string | null): string[] {
   if (!json) return [];
@@ -549,24 +548,37 @@ export class SQLiteStorage implements IStorage {
   }
   
 
-  // sqlite-storage.ts  (финальная версия)
-// sqlite-storage.ts
   async createMessage(msg: InsertMessage): Promise<Message> {
-    /** 1. attachments → строка, если вдруг пришёл объект */
-    const payload: Record<string, any> = { ...msg };
-    if ('attachments' in payload && typeof payload.attachments !== 'string') {
-      payload.attachments = JSON.stringify(payload.attachments);
-    }
+    // В SQLite нет функции `now()`, поэтому время создаём в коде
+    const timestamp = new Date().toISOString();
 
-    /** 2. никаких createdAt — БД сама выставит дефолт */
-    const [row] = await db.insert(messages).values(payload).returning();
+    const insert = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const { lastInsertRowid } = insert.run(
+      msg.senderId,
+      msg.receiverId,
+      msg.content,
+      timestamp
+    );
 
-    /** 3. Drizzle вернёт createdAt строкой; но если драйвер
-        вдруг вернул Date, превратим в ISO */
-    const createdAt =
-      row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt;
+    const row = sqliteDb
+      .prepare(
+        `SELECT id, sender_id, receiver_id, content, is_read, created_at
+         FROM messages WHERE id = ?`
+      )
+      .get(Number(lastInsertRowid)) as any;
 
-    return { ...row, createdAt } as Message;
+    // SQLite возвращает даты строками, поэтому преобразуем их в Date
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: new Date(row.created_at),
+    } as Message;
   }
 
 
@@ -670,8 +682,8 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временные метки для SQLite
     const orderWithTimestamps = {
       ...order,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     const [newOrder] = await db.insert(deliveryOrders).values(orderWithTimestamps).returning();
     return newOrder;
@@ -680,7 +692,7 @@ export class SQLiteStorage implements IStorage {
   async updateDeliveryOrderStatus(id: number, status: string): Promise<DeliveryOrder | undefined> {
     const [updatedOrder] = await db
       .update(deliveryOrders)
-      .set({ status, updatedAt: new Date() })
+      .set({ status, updatedAt: new Date().toISOString() })
       .where(eq(deliveryOrders.id, id))
       .returning();
     return updatedOrder;
@@ -689,7 +701,7 @@ export class SQLiteStorage implements IStorage {
   async updateDeliveryOrderTracking(id: number, trackingCode: string): Promise<DeliveryOrder | undefined> {
     const [updatedOrder] = await db
       .update(deliveryOrders)
-      .set({ trackingCode, updatedAt: new Date() })
+      .set({ trackingCode, updatedAt: new Date().toISOString() })
       .where(eq(deliveryOrders.id, id))
       .returning();
     return updatedOrder;
@@ -725,15 +737,15 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временные метки для SQLite
     const estimateWithTimestamps = {
       ...estimate,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     const [newEstimate] = await db.insert(estimates).values(estimateWithTimestamps).returning();
     return newEstimate;
   }
   
   async updateEstimate(id: number, estimateData: Partial<Estimate>): Promise<Estimate | undefined> {
-    const data = { ...estimateData, updatedAt: new Date() };
+    const data = { ...estimateData, updatedAt: new Date().toISOString() };
     
     const [updatedEstimate] = await db
       .update(estimates)
@@ -752,7 +764,7 @@ export class SQLiteStorage implements IStorage {
   async updateEstimateStatus(id: number, status: string): Promise<Estimate | undefined> {
     const [updatedEstimate] = await db
       .update(estimates)
-      .set({ status, updatedAt: new Date() })
+      .set({ status, updatedAt: new Date().toISOString() })
       .where(eq(estimates.id, id))
       .returning();
     
@@ -832,7 +844,7 @@ export class SQLiteStorage implements IStorage {
   
   async updateDesignProject(id: number, projectData: Partial<DesignProject>): Promise<DesignProject | undefined> {
     // Если обновляются массивы, преобразуем их в JSON
-    const data = { ...projectData, updatedAt: new Date() };
+    const data = { ...projectData, updatedAt: new Date().toISOString() };
     if (data.visualizationUrls) {
       data.visualizationUrls = JSON.stringify(data.visualizationUrls);
     }
@@ -864,7 +876,7 @@ export class SQLiteStorage implements IStorage {
   async updateDesignProjectStatus(id: number, status: string): Promise<DesignProject | undefined> {
     const [updatedProject] = await db
       .update(designProjects)
-      .set({ status, updatedAt: new Date() })
+      .set({ status, updatedAt: new Date().toISOString() })
       .where(eq(designProjects.id, id))
       .returning();
     
@@ -893,7 +905,7 @@ export class SQLiteStorage implements IStorage {
       .update(designProjects)
       .set({
         visualizationUrls: JSON.stringify(currentVisualizations),
-        updatedAt: new Date()
+        updatedAt: new Date().toISOString()
       })
       .where(eq(designProjects.id, id))
       .returning();
@@ -921,7 +933,7 @@ export class SQLiteStorage implements IStorage {
       .update(designProjects)
       .set({
         projectFiles: JSON.stringify(currentFiles),
-        updatedAt: new Date()
+        updatedAt: new Date().toISOString()
       })
       .where(eq(designProjects.id, id))
       .returning();
@@ -996,7 +1008,7 @@ export class SQLiteStorage implements IStorage {
   }
   
   async updateCrew(id: number, crewData: Partial<Crew>): Promise<Crew | undefined> {
-    const data = { ...crewData, updatedAt: new Date() };
+    const data = { ...crewData, updatedAt: new Date().toISOString() };
     
     const [updatedCrew] = await db
       .update(crews)

@@ -175,7 +175,8 @@ export const messages = pgTable("messages", {
   receiverId: integer("receiver_id").notNull().references(() => users.id),
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  // В SQLite нет функции now(), поэтому ставим метку времени вручную
+  createdAt: timestamp("created_at").notNull(),
 });
 
 // Reviews table
