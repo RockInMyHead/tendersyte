@@ -549,22 +549,27 @@ export class SQLiteStorage implements IStorage {
   
 
   async createMessage(msg: InsertMessage): Promise<Message> {
-
-    const now = new Date().toISOString();
-
-    const insert = sqliteDb.prepare(
-      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+     * Для SQLite не работает функция `now()` в дефолтных значениях,
+     * поэтому временную метку добавляем вручную. Используем ISO‑строку,
+     * так библиотека корректно сохранит её как TEXT.
+    const timestamp = new Date().toISOString();
+    const insertStmt = sqliteDb.prepare(
        VALUES (?, ?, ?, ?)`
     );
-    const result = insert.run(msg.senderId, msg.receiverId, msg.content, now);
-    const payload: Record<string, any> = {
-      senderId: msg.senderId,
-      receiverId: msg.receiverId,
-      content: msg.content
-    };
-
-    /**
-     * 2. SQLite may not support the `now()` function if the table was
+    const result = insertStmt.run(
+      msg.senderId,
+      msg.receiverId,
+      msg.content,
+      timestamp
+    );
+    const selectStmt = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const messageRow = selectStmt.get(Number(result.lastInsertRowid)) as any;
+      id: messageRow.id,
+      senderId: messageRow.sender_id,
+      receiverId: messageRow.receiver_id,
+      content: messageRow.content,
+      isRead: !!messageRow.is_read,
+      createdAt: messageRow.created_at,
      *    created with an incompatible default. To avoid errors when the
      *    default expression is invalid we explicitly supply the creation
      *    timestamp.
