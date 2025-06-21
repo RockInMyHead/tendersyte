@@ -557,6 +557,32 @@ export class SQLiteStorage implements IStorage {
      */
     const timestamp = new Date().toISOString();
 
+
+    const insertStmt = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const result = insertStmt.run(
+      msg.senderId,
+      msg.receiverId,
+      msg.content,
+      timestamp
+    );
+
+    const selectStmt = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const row = selectStmt.get(Number(result.lastInsertRowid)) as any;
+
+    // SQLite возвращает даты строками, а тип Message ожидает объект Date
+    // Поэтому явно преобразуем значение в Date для совместимости
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: new Date(row.created_at),
+
+
     const insertStmt = sqliteDb.prepare(
       `INSERT INTO messages (sender_id, receiver_id, content, created_at)
        VALUES (?, ?, ?, ?)`
