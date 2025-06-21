@@ -23,7 +23,6 @@ import {
   type CrewMemberSkill, type InsertCrewMemberSkill,
   type BankGuarantee, type InsertBankGuarantee
 } from '@shared/schema';
-import { InsertMessage, Message } from '@shared/schema';
 // Преобразование строки JSON в массив строк
 function parseJsonArray(json: string | null): string[] {
   if (!json) return [];
@@ -295,8 +294,8 @@ export class SQLiteStorage implements IStorage {
     const tenderData = {
       ...tender,
       images: JSON.stringify(tender.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newTender] = await db.insert(tenders).values(tenderData).returning();
@@ -357,7 +356,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const bidWithTimestamp = {
       ...bid,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newBid] = await db.insert(tenderBids).values(bidWithTimestamp).returning();
     return newBid;
@@ -467,8 +466,8 @@ export class SQLiteStorage implements IStorage {
     const listingData = {
       ...listing,
       images: JSON.stringify(listing.images || []),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const [newListing] = await db.insert(marketplaceListings).values(listingData).returning();
@@ -549,24 +548,31 @@ export class SQLiteStorage implements IStorage {
   }
   
 
-  // sqlite-storage.ts  (финальная версия)
-// sqlite-storage.ts
   async createMessage(msg: InsertMessage): Promise<Message> {
-    /** 1. attachments → строка, если вдруг пришёл объект */
-    const payload: Record<string, any> = { ...msg };
-    if ('attachments' in payload && typeof payload.attachments !== 'string') {
-      payload.attachments = JSON.stringify(payload.attachments);
-    }
+    /**
+     * Сохраняем только разрешённые поля. В актуальной схеме нет
+     * поддержки вложений, поэтому отправляем только текст, идентификаторы
+     * отправителя и получателя и явную метку времени.
+     */
+    const now = new Date().toISOString();
 
-    /** 2. никаких createdAt — БД сама выставит дефолт */
-    const [row] = await db.insert(messages).values(payload).returning();
+    const insert = sqliteDb.prepare(
+      `INSERT INTO messages (sender_id, receiver_id, content, created_at)
+       VALUES (?, ?, ?, ?)`
+    );
+    const result = insert.run(msg.senderId, msg.receiverId, msg.content, now);
 
-    /** 3. Drizzle вернёт createdAt строкой; но если драйвер
-        вдруг вернул Date, превратим в ISO */
-    const createdAt =
-      row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt;
+    const select = sqliteDb.prepare(`SELECT * FROM messages WHERE id = ?`);
+    const row = select.get(Number(result.lastInsertRowid)) as any;
 
-    return { ...row, createdAt } as Message;
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: row.created_at,
+    } as Message;
   }
 
 
@@ -593,7 +599,7 @@ export class SQLiteStorage implements IStorage {
     // Добавляем временную метку для SQLite в формате ISO строки
     const reviewWithTimestamp = {
       ...review,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
     const [newReview] = await db.insert(reviews).values(reviewWithTimestamp).returning();
     return newReview;
