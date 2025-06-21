@@ -550,13 +550,15 @@ export class SQLiteStorage implements IStorage {
 
   async createMessage(msg: InsertMessage): Promise<Message> {
 
-    /**
-     * Для SQLite не работает функция `now()` в дефолтных значениях,
-     * поэтому временную метку добавляем вручную. Используем ISO‑строку,
-     * так библиотека корректно сохранит её как TEXT.
-     */
-    const timestamp = new Date().toISOString();
-
+    const row = selectStmt.get(Number(result.lastInsertRowid)) as any;
+    // SQLite возвращает даты строками, а тип Message ожидает объект Date
+    // Поэтому явно преобразуем значение в Date для совместимости
+      id: row.id,
+      senderId: row.sender_id,
+      receiverId: row.receiver_id,
+      content: row.content,
+      isRead: !!row.is_read,
+      createdAt: new Date(row.created_at),
     const insertStmt = sqliteDb.prepare(
       `INSERT INTO messages (sender_id, receiver_id, content, created_at)
        VALUES (?, ?, ?, ?)`
