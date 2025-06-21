@@ -571,6 +571,17 @@ export class SQLiteStorage implements IStorage {
       payload.createdAt = new Date();
     }
 
+
+    /**
+     * 2. SQLite may not support the `now()` function if the table was
+     *    created with an incompatible default. To avoid errors when the
+     *    default expression is invalid we explicitly supply the creation
+     *    timestamp.
+     */
+    if (!('createdAt' in payload)) {
+      payload.createdAt = new Date().toISOString();
+    }
+
     const [row] = await db.insert(messages).values(payload).returning();
 
     /** 3. Drizzle вернёт createdAt строкой; но если драйвер
